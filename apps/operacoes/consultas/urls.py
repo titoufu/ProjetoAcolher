@@ -35,7 +35,7 @@ urlpatterns = [
     path("entregas/assistido/",views.entregas_assistido_historico,name="entregas_assistido_historico",),
     path("entregas/assistido/imprimir/",views.entregas_assistido_historico_print,name="entregas_assistido_historico_print",),
 
-    path("consultas/lotes/", views.consulta_lotes_resumo, name="consulta_lotes_resumo"),
+    path("lotes/", views.consulta_lotes_resumo, name="consulta_lotes_resumo"),
 
 
     ]
