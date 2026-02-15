@@ -13,6 +13,14 @@ from apps.beneficios.models import Beneficio, BeneficioAssistido, LoteEntrega, I
 from datetime import date
 from django.utils.dateparse import parse_date
 from django.shortcuts import get_object_or_404
+from apps.operacoes.services.entregas_queries import (historico_itens_por_assistido, opcoes_beneficios,)
+
+
+
+# mantém seu helper de ordenação
+# from .utils import _get_order_entregas_assistido  # se estiver em outro lugar
+# (se ele já está no mesmo arquivo, não precisa importar)
+
 
 
 ORDERS_ENTREGAS_LOTES = {
@@ -763,6 +771,7 @@ def entregas_lote_print(request):
     }
     return render(request, "operacoes/consultas/entregas_lote_detalhe_print.html", contexto)
 
+
 @login_required
 def entregas_assistido_historico(request):
     if not pode_ver(request.user):
@@ -775,60 +784,32 @@ def entregas_assistido_historico(request):
     status = (request.GET.get("status") or "todos").strip().lower()
 
     order = _get_order_entregas_assistido(request)
-    
 
-    # select de benefícios (para filtro opcional)
-    beneficios = Beneficio.objects.order_by("nome", "id")
+    beneficios = opcoes_beneficios()
 
-    # base: itens de entrega com joins
-    qs = (
-        ItemEntrega.objects
-        .select_related(
-            "lote",
-            "lote__beneficio",
-            "atribuicao",
-            "atribuicao__assistido",
-        )
-    )
-
-    # --- filtro por assistido (q) ---
-    if q:
-        qs = qs.filter(
-            Q(atribuicao__assistido__nome__icontains=q) |
-            Q(atribuicao__assistido__cpf__icontains=q) |
-            Q(atribuicao__assistido__telefone__icontains=q)
-        )
-        qs = qs.order_by(order)
-    # --- filtro por período (data do lote) ---
-    if data_ini:
-        qs = qs.filter(lote__data_entrega__gte=data_ini)
-    if data_fim:
-        qs = qs.filter(lote__data_entrega__lte=data_fim)
-
-    # --- filtro por benefício ---
-    if beneficio_id:
-        qs = qs.filter(lote__beneficio_id=beneficio_id)
-
-    # --- filtro por status de entrega ---
-    if status == "entregues":
-        qs = qs.filter(entregue=True)
-    elif status == "pendentes":
-        qs = qs.filter(entregue=False)
-    else:
-        status = "todos"
-
-    qs = qs.order_by(order)
+    qs = historico_itens_por_assistido(
+        q=q,
+        data_ini=data_ini,
+        data_fim=data_fim,
+        beneficio_id=beneficio_id,
+        status=status,
+    ).order_by(order)
 
     total = qs.count()
     entregues_count = qs.filter(entregue=True).count()
     pendentes_count = qs.filter(entregue=False).count()
+
+    # normaliza status para o template
+    status_norm = (status or "todos").strip().lower()
+    if status_norm not in {"todos", "entregue", "entregues", "pendente", "pendentes"}:
+        status_norm = "todos"
 
     contexto = {
         "q": q,
         "data_ini": data_ini,
         "data_fim": data_fim,
         "beneficio_id": beneficio_id,
-        "status": status,
+        "status": status_norm,
 
         "beneficios": beneficios,
 
@@ -837,11 +818,7 @@ def entregas_assistido_historico(request):
         "entregues_count": entregues_count,
         "pendentes_count": pendentes_count,
     }
-    return render(
-        request,
-        "operacoes/consultas/entregas_assistido_historico.html",
-        contexto
-    )
+    return render(request, "operacoes/consultas/entregas_assistido_historico.html", contexto)
 
 
 @login_required
@@ -856,61 +833,35 @@ def entregas_assistido_historico_print(request):
     status = (request.GET.get("status") or "todos").strip().lower()
 
     order = _get_order_entregas_assistido(request)
-    
 
-    beneficios = Beneficio.objects.order_by("nome", "id")
+    beneficios = opcoes_beneficios()
 
-    qs = (
-        ItemEntrega.objects
-        .select_related(
-            "lote",
-            "lote__beneficio",
-            "atribuicao",
-            "atribuicao__assistido",
-        )
-    )
-    qs = qs.order_by(order)
-    if q:
-        qs = qs.filter(
-            Q(atribuicao__assistido__nome__icontains=q) |
-            Q(atribuicao__assistido__cpf__icontains=q) |
-            Q(atribuicao__assistido__telefone__icontains=q)
-        )
+    qs = historico_itens_por_assistido(
+        q=q,
+        data_ini=data_ini,
+        data_fim=data_fim,
+        beneficio_id=beneficio_id,
+        status=status,
+    ).order_by(order)
 
-    if data_ini:
-        qs = qs.filter(lote__data_entrega__gte=data_ini)
-    if data_fim:
-        qs = qs.filter(lote__data_entrega__lte=data_fim)
-
-    if beneficio_id:
-        qs = qs.filter(lote__beneficio_id=beneficio_id)
-
-    if status == "entregues":
-        qs = qs.filter(entregue=True)
-    elif status == "pendentes":
-        qs = qs.filter(entregue=False)
-    else:
-        status = "todos"
-
-    qs = qs.order_by(order)
+    status_norm = (status or "todos").strip().lower()
+    if status_norm not in {"todos", "entregue", "entregues", "pendente", "pendentes"}:
+        status_norm = "todos"
 
     contexto = {
         "q": q,
         "data_ini": data_ini,
         "data_fim": data_fim,
         "beneficio_id": beneficio_id,
-        "status": status,
+        "status": status_norm,
         "beneficios": beneficios,
         "itens": qs,
         "total": qs.count(),
         "entregues_count": qs.filter(entregue=True).count(),
         "pendentes_count": qs.filter(entregue=False).count(),
     }
-    return render(
-        request,
-        "operacoes/consultas/entregas_assistido_historico_print.html",
-        contexto
-    )
+    return render(request, "operacoes/consultas/entregas_assistido_historico_print.html", contexto)
+
 
 @login_required
 def entregas_lote_chamada(request):
