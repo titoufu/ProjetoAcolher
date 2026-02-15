@@ -8,6 +8,7 @@ from django.db.models import Count, Q
 
 from apps.beneficios.models import LoteEntrega, ItemEntrega, Beneficio, BeneficioAssistido
 from apps.assistidos.models import Assistido
+from django.shortcuts import get_object_or_404
 
 
 def _parse_date(s: str) -> Optional[date]:
@@ -19,22 +20,15 @@ def _parse_date(s: str) -> Optional[date]:
         return date.fromisoformat(s)
     except ValueError:
         return None
-
-
-def _normalize_status(status: str) -> str:
-    status = (status or "todos").strip().lower()
-    if status not in {"todos", "entregue", "pendente"}:
-        status = "todos"
-    return status
-
-
 def lotes_com_resumo(
     *,
     q: str = "",
     data_ini: str = "",
     data_fim: str = "",
     beneficio_id: str = "",
+    order_by: str = "-data_entrega",
 ):
+
     """
     QuerySet de LoteEntrega com anotações:
       - total_itens
@@ -68,12 +62,11 @@ def lotes_com_resumo(
         if q.isdigit():
             cond |= Q(id=int(q))
         qs = qs.filter(cond)
-
     qs = qs.annotate(
-        total_itens=Count("itens", distinct=True),
+        total=Count("itens", distinct=True),
         entregues=Count("itens", filter=Q(itens__entregue=True), distinct=True),
         pendentes=Count("itens", filter=Q(itens__entregue=False), distinct=True),
-    ).order_by("-data_entrega", "-id")
+    ).order_by(order_by, "-id")
 
     return qs
 
@@ -146,3 +139,48 @@ def _normalize_status(status: str) -> str:
         "pendentes": "pendente",
     }
     return mapa.get(status, "todos")
+
+def lote_por_id(*, lote_id: str):
+    # aceita string numérica
+    return get_object_or_404(
+        LoteEntrega.objects.select_related("beneficio"),
+        id=int(lote_id),
+    )
+
+def itens_por_lote(
+    *,
+    lote_id: str,
+    order_by: str = "atribuicao__assistido__nome",
+):
+    qs = (
+        ItemEntrega.objects
+        .select_related("atribuicao__assistido", "atribuicao__beneficio", "lote", "lote__beneficio")
+        .filter(lote_id=int(lote_id))
+        .order_by(order_by)
+    )
+    return qs
+from django.shortcuts import get_object_or_404
+from apps.beneficios.models import LoteEntrega, ItemEntrega
+
+def itens_do_lote(*, lote_id: str, order_by: str = "atribuicao__assistido__nome"):
+    """
+    Retorna:
+      (lote, itens_qs, entregues_qs, pendentes_qs)
+    """
+    lote_id = (lote_id or "").strip()
+    lote = get_object_or_404(
+        LoteEntrega.objects.select_related("beneficio"),
+        id=int(lote_id),
+    )
+
+    itens_qs = (
+        ItemEntrega.objects
+        .select_related("atribuicao__assistido", "atribuicao__beneficio", "lote", "lote__beneficio")
+        .filter(lote_id=lote.id)
+        .order_by(order_by)
+    )
+
+    entregues = itens_qs.filter(entregue=True)
+    pendentes = itens_qs.filter(entregue=False)
+    return lote, itens_qs, entregues, pendentes
+

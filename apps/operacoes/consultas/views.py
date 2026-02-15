@@ -3,17 +3,18 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Count, Q
 from django.shortcuts import render
-
 from apps.assistidos.models import Assistido
 from apps.operacoes.permissoes import pode_ver
- 
 from django.http import HttpResponseForbidden
 from apps.beneficios.models import Beneficio, BeneficioAssistido, LoteEntrega, ItemEntrega
-
 from datetime import date
 from django.utils.dateparse import parse_date
 from django.shortcuts import get_object_or_404
-from apps.operacoes.services.entregas_queries import (historico_itens_por_assistido, opcoes_beneficios,)
+from apps.operacoes.services.entregas_queries import ( historico_itens_por_assistido,opcoes_beneficios, lotes_com_resumo,itens_do_lote,)
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
+from django.shortcuts import render
+
 
 
 
@@ -605,129 +606,79 @@ def entregas_lotes_lista(request):
     if not pode_ver(request.user):
         return HttpResponseForbidden("Sem permissão.")
 
-    # --- filtros (GET) ---
+    q = (request.GET.get("q") or "").strip()
     data_ini = (request.GET.get("data_ini") or "").strip()
     data_fim = (request.GET.get("data_fim") or "").strip()
     beneficio_id = (request.GET.get("beneficio_id") or "").strip()
 
-    dt_ini = parse_date(data_ini) if data_ini else None
-    dt_fim = parse_date(data_fim) if data_fim else None
+    order = _get_order_entregas_lotes(request)  # usa seu mapeamento ORDERS_ENTREGAS_LOTES
 
-    order = _get_order_entregas_lotes(request)
-
-    # --- queryset base ---
-    qs = (
-        LoteEntrega.objects
-        .select_related("beneficio")
-        .annotate(
-            total=Count("itens"),
-            entregues=Count("itens", filter=Q(itens__entregue=True)),
-            pendentes=Count("itens", filter=Q(itens__entregue=False)),
-        )
+    qs = lotes_com_resumo(
+        q=q,
+        data_ini=data_ini,
+        data_fim=data_fim,
+        beneficio_id=beneficio_id,
+        order_by=order,
     )
 
-    # --- aplica filtros ---
-    if dt_ini:
-        qs = qs.filter(data_entrega__gte=dt_ini)
-
-    if dt_fim:
-        qs = qs.filter(data_entrega__lte=dt_fim)
-
-    if beneficio_id:
-        qs = qs.filter(beneficio_id=beneficio_id)
-
-    # --- ordenação ---
-    qs = qs.order_by(order)
-
-    # dropdown benefícios (para filtro)
-    # (se Beneficio já existe em consultas, use o mesmo import que você usa lá)
-    beneficios = Beneficio.objects.order_by("nome", "id")
+    beneficios = opcoes_beneficios()
 
     contexto = {
         "lotes": qs,
-        "total": qs.count(),  # total de lotes encontrados (não total de itens)
+        "total": qs.count(),
         "beneficios": beneficios,
+        "q": q,
         "beneficio_id": beneficio_id,
         "data_ini": data_ini,
         "data_fim": data_fim,
     }
     return render(request, "operacoes/consultas/entregas_lotes_lista.html", contexto)
 
+
 @login_required
 def entregas_lotes_print(request):
     if not pode_ver(request.user):
         return HttpResponseForbidden("Sem permissão.")
 
+    q = (request.GET.get("q") or "").strip()
     data_ini = (request.GET.get("data_ini") or "").strip()
     data_fim = (request.GET.get("data_fim") or "").strip()
     beneficio_id = (request.GET.get("beneficio_id") or "").strip()
 
-    dt_ini = parse_date(data_ini) if data_ini else None
-    dt_fim = parse_date(data_fim) if data_fim else None
-
     order = _get_order_entregas_lotes(request)
 
-    qs = (
-        LoteEntrega.objects
-        .select_related("beneficio")
-        .annotate(
-            total=Count("itens"),
-            entregues=Count("itens", filter=Q(itens__entregue=True)),
-            pendentes=Count("itens", filter=Q(itens__entregue=False)),
-        )
+    qs = lotes_com_resumo(
+        q=q,
+        data_ini=data_ini,
+        data_fim=data_fim,
+        beneficio_id=beneficio_id,
+        order_by=order,
     )
-
-    if dt_ini:
-        qs = qs.filter(data_entrega__gte=dt_ini)
-
-    if dt_fim:
-        qs = qs.filter(data_entrega__lte=dt_fim)
-
-    if beneficio_id:
-        qs = qs.filter(beneficio_id=beneficio_id)
-
-    qs = qs.order_by(order)
-
-    beneficio_sel = None
-    if beneficio_id:
-        beneficio_sel = Beneficio.objects.filter(id=beneficio_id).first()
 
     contexto = {
         "lotes": qs,
         "total": qs.count(),
-        "beneficio_sel": beneficio_sel,
+        "beneficios": opcoes_beneficios(),
+        "q": q,
         "beneficio_id": beneficio_id,
         "data_ini": data_ini,
         "data_fim": data_fim,
     }
     return render(request, "operacoes/consultas/entregas_lotes_print.html", contexto)
 
+
 @login_required
 def entregas_lote_detalhe(request):
     if not pode_ver(request.user):
         return HttpResponseForbidden("Sem permissão.")
-
     lote_id = (request.GET.get("lote_id") or "").strip()
     order = _get_order_entregas_lote(request)
 
-    # agora é obrigatório existir (fluxo vem do "olho")
-    lote = get_object_or_404(
-        LoteEntrega.objects.select_related("beneficio"),
-        id=lote_id
-    )
+    lote, itens_qs, entregues, pendentes = itens_do_lote(lote_id=lote_id, order_by=order) 
 
-    itens_qs = (
-        ItemEntrega.objects
-        .select_related("atribuicao__assistido", "atribuicao__beneficio", "lote")
-        .filter(lote_id=lote.id)
-        .order_by(order)
-    )
-
-    entregues = itens_qs.filter(entregue=True)
-    pendentes = itens_qs.filter(entregue=False)
     contexto = {
         "lote": lote,
-        "itens": itens_qs,              # ✅ compatibilidade
+        "itens": itens_qs,
         "entregues": entregues,
         "pendentes": pendentes,
         "total": itens_qs.count(),
@@ -735,7 +686,6 @@ def entregas_lote_detalhe(request):
         "pendentes_count": pendentes.count(),
     }
     return render(request, "operacoes/consultas/entregas_lote_detalhe.html", contexto)
-
 
 @login_required
 def entregas_lote_print(request):
@@ -745,10 +695,7 @@ def entregas_lote_print(request):
     lote_id = (request.GET.get("lote_id") or "").strip()
     order = _get_order_entregas_lote(request)
 
-    lote = get_object_or_404(
-        LoteEntrega.objects.select_related("beneficio"),
-        id=lote_id
-    )
+    lote, itens_qs, entregues, pendentes = itens_do_lote(lote_id=lote_id, order_by=order) 
 
     itens_qs = (
         ItemEntrega.objects
@@ -936,49 +883,36 @@ def entregas_lote_chamada_print(request):
         "total": itens_qs.count(),
     }
     return render(request, "operacoes/consultas/entregas_lote_chamada_print.html", context)
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
-from django.shortcuts import render
-
-from apps.beneficios.models import LoteEntrega, Beneficio
 
 
 @login_required
 def consulta_lotes_resumo(request):
-    beneficio_id = (request.GET.get("beneficio_id") or "").strip()
-    data_ini = (request.GET.get("data_ini") or "").strip()
-    data_fim = (request.GET.get("data_fim") or "").strip()
+    if not pode_ver(request.user):
+        return HttpResponseForbidden("Sem permissão.")
 
-    qs = LoteEntrega.objects.select_related("beneficio")
+    q = (request.GET.get("q") or "").strip()
+    beneficio_id = (request.GET.get("beneficio_id") or request.GET.get("beneficio") or "").strip()
+    data_ini = (request.GET.get("data_ini") or request.GET.get("data_inicio") or request.GET.get("data_inicial") or "").strip()
+    data_fim = (request.GET.get("data_fim") or request.GET.get("data_final") or "" ).strip()
 
-    if beneficio_id.isdigit():
-        qs = qs.filter(beneficio_id=int(beneficio_id))
-
-    campo_data = "data_entrega" if hasattr(LoteEntrega, "data_entrega") else "data"
-
-    if data_ini:
-        qs = qs.filter(**{f"{campo_data}__gte": data_ini})
-    if data_fim:
-        qs = qs.filter(**{f"{campo_data}__lte": data_fim})
-
-    qs = qs.annotate(
-        total=Count("itens"),
-        entregues=Count("itens", filter=Q(itens__entregue=True)),
-        pendentes=Count("itens", filter=Q(itens__entregue=False)),
-    ).order_by(f"-{campo_data}", "-id")
-
-    beneficios = Beneficio.objects.order_by("nome")
-
-    return render(
-        request,
-        "operacoes/consultas/lotes_resumo.html",
-        {
-            "lotes": qs,
-            "beneficios": beneficios,
-            "beneficio_id": beneficio_id,
-            "data_ini": data_ini,
-            "data_fim": data_fim,
-            "campo_data": campo_data,
-        },
+    # 🔥 mesma lógica centralizada do "entregas/": filtros + annotate
+    qs = lotes_com_resumo(
+        q=q,
+        data_ini=data_ini,
+        data_fim=data_fim,
+        beneficio_id=beneficio_id,
+        order_by="-data_entrega",
     )
 
+    contexto = {
+        "lotes": qs,
+        "beneficios": opcoes_beneficios(),
+        "q": q,
+        "beneficio_id": beneficio_id,
+        "data_ini": data_ini,
+        "data_fim": data_fim,
+
+        # compatibilidade com template antigo (se existir)
+        "campo_data": "data_entrega",
+    }
+    return render(request, "operacoes/consultas/lotes_resumo.html", contexto)
