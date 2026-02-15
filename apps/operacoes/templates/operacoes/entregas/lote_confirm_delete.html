@@ -1,0 +1,30 @@
+{% extends "operacoes/base.html" %}
+
+{% block title %}Excluir Lote{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5>Tem certeza que deseja excluir este lote?</h5>
+
+      <p>
+        <strong>Data:</strong> {{ lote.data_entrega|date:"d/m/Y" }}<br>
+        <strong>Benefício:</strong> {{ lote.beneficio.nome }}
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">
+          <i class="bi bi-trash"></i> Confirmar Exclusão
+        </button>
+        <a href="{% url 'entregas:lote_lista' %}" class="btn btn-outline-secondary">
+          Cancelar
+        </a>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

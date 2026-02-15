@@ -1,0 +1,124 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Atribuições{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-1">Atribuições</h1>
+    <p class="text-muted mb-0">Benefícios atribuídos aos assistidos</p>
+  </div>
+
+  <a class="btn btn-primary" href="{% url 'atribuicoes:atribuicao_nova' %}">
+    <i class="bi bi-plus-circle"></i> Nova atribuição
+  </a>
+</div>
+
+{% if grupos %}
+  {% for assistido, atribuicoes in grupos.items %}
+
+    <div class="card shadow-sm mb-3">
+      <div class="card-header bg-body-tertiary d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ assistido.nome|title }}</strong>
+          {% if assistido.cpf %}
+            <span class="text-muted small">• CPF: {{ assistido.cpf_formatado }}</span>
+          {% endif %}
+        </div>
+
+        {% if pode_editar %}
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{% url 'assistidos:assistido_beneficio_create' id=assistido.id %}">
+            <i class="bi bi-plus-circle"></i> Atribuir benefício
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Benefício</th>
+                <th style="width:220px;">Período</th>
+                <th style="width:160px;">Criado em</th>
+                <th style="width:170px;" class="text-end">Ações</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% if atribuicoes %}
+                {% for a in atribuicoes %}
+                  <tr>
+                    <td class="fw-semibold">{{ a.beneficio.nome }}</td>
+
+                    
+                    <td>
+                      <div class="small">
+                        <div><strong>Início:</strong> {{ a.data_inicio|date:"d/m/Y" }}</div>
+                        <div>
+                          <strong>Término:</strong>
+                          {% if a.data_termino %}
+                            {{ a.data_termino|date:"d/m/Y" }}
+                          {% else %}
+                            <span class="text-muted">—</span>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>{{ a.criado_em|date:"d/m/Y" }}</td>
+
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2 flex-nowrap">
+                        {% if pode_editar %}
+                          <!-- EDITAR -->
+                          <a class="btn btn-sm btn-outline-warning"
+                             href="{% url 'assistidos:assistido_beneficio_update' assistido.id a.id %}"
+                             title="Editar">
+                            <i class="bi bi-pencil"></i>
+                          </a>
+
+                          {% if a.ativo %}
+                            <!-- ENCERRAR -->
+                            <form method="post"
+                                  action="{% url 'assistidos:assistido_beneficio_encerrar' assistido.id a.id %}"
+                                  class="m-0 p-0">
+                              {% csrf_token %}
+                              <button type="submit"
+                                      class="btn btn-sm btn-outline-danger"
+                                      title="Encerrar"
+                                      onclick="return confirm('Encerrar esta atribuição?');">
+                                <i class="bi bi-x-circle"></i>
+                              </button>
+                            </form>
+                          {% endif %}
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-3">
+                    Nenhuma atribuição cadastrada para este assistido.
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+
+  {% endfor %}
+{% else %}
+  <div class="card shadow-sm">
+    <div class="card-body text-center text-muted p-4">
+      Nenhuma atribuição cadastrada.
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

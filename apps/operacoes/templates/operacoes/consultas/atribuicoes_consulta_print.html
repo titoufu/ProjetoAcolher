@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório — Atribuições</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h2 { margin-bottom: 5px; }
+
+    .assistido-bloco { margin-bottom: 25px; }
+    .assistido-nome { font-weight: bold; margin-bottom: 2px; }
+    .assistido-cpf { color: #555; margin-bottom: 8px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background-color: #f0f0f0; }
+
+    .encerrada { color: #777; }
+
+    /* Barra simples (só na tela) */
+    .topbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 6px 10px;
+      border: 1px solid #ccc;
+      background: #f8f8f8;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    @media print {
+      @page { margin: 2cm; }
+      .topbar { display: none !important; } /* não aparece no papel */
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <button class="btn" type="button" onclick="voltar()">← Voltar</button>
+    <button class="btn" type="button" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+
+  <h2>Relatório de Atribuições</h2>
+  <p>Status: {{ status|title }} | Total: {{ total }}</p>
+
+  <hr>
+
+  {% for assistido, atribs in grupos.items %}
+    <div class="assistido-bloco">
+      <div class="assistido-nome">{{ assistido.nome }}</div>
+      <div class="assistido-cpf">CPF: {{ assistido.cpf }}</div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Benefício</th>
+            <th>Status</th>
+            <th>Início</th>
+            <th>Término</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in atribs %}
+            <tr class="{% if not a.ativo %}encerrada{% endif %}">
+              <td>{{ a.beneficio.nome }}</td>
+              <td>{% if a.ativo %}Ativa{% else %}Encerrada{% endif %}</td>
+              <td>{% if a.data_inicio %}{{ a.data_inicio|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+              <td>{% if a.data_termino %}{{ a.data_termino|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endfor %}
+
+  <script>
+    function voltar() {
+      // mais robusto que history.back()
+      if (document.referrer) {
+        window.location.href = document.referrer;
+      } else {
+        window.history.back();
+      }
+    }
+
+    // Auto-print com fallback simples
+    window.addEventListener("load", () => {
+      // pequenos atrasos ajudam a garantir renderização em alguns browsers
+      setTimeout(() => {
+        try { window.print(); } catch (e) {}
+      }, 200);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Ficha do Assistido{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-1">Ficha do Assistido</h1>
+    <div class="text-muted small">
+      <strong>{{ assistido.nome|title }}</strong>
+      {% if assistido.cpf %}
+        • CPF: {{ assistido.cpf_formatado }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div>
+    {% if assistido.status == "ATIVO" %}
+      <span class="badge text-bg-success">Ativo</span>
+    {% else %}
+      <span class="badge text-bg-secondary">Inativo</span>
+    {% endif %}
+  </div>
+</div>
+
+{% for titulo, itens in secoes.items %}
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>{{ titulo }}</strong>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover mb-0 align-middle">
+          <tbody>
+            {% for label, valor in itens %}
+              <tr>
+                <td class="fw-semibold text-muted" style="width: 28%;">
+                  {{ label }}
+                </td>
+                <td>
+                  {% if valor != "—" %}
+                    {{ valor|title }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
+<div class="d-flex flex-wrap gap-2 mt-3">
+  <a class="btn btn-outline-secondary"
+     href="{% url 'assistidos:assistidos_lista' %}">
+    <i class="bi bi-arrow-left"></i> Voltar
+  </a>
+
+  {% if pode_editar %}
+    <a class="btn btn-primary"
+       href="{% url 'assistidos:assistido_update' assistido.id %}">
+      <i class="bi bi-pencil-square"></i> Editar
+    </a>
+  {% endif %}
+
+  {% if pode_deletar %}
+    <a class="btn btn-danger"
+       href="{% url 'assistidos:assistido_delete' assistido.id %}">
+      <i class="bi bi-trash"></i> Deletar
+    </a>
+  {% endif %}
+</div>
+
+{% endblock %}

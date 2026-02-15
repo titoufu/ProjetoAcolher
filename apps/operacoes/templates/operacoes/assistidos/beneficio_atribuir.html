@@ -1,0 +1,102 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Atribuir Benefício{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-1">
+      {% if modo == "editar" %}
+      Editar Benefício Atribuído
+      {% else %}
+      Atribuir um Novo Benefício
+      {% endif %}
+    </h1>
+    <div class="text-muted small">
+      Assistido: <strong>{{ assistido.nome|title }}</strong>
+      {% if assistido.cpf %} • CPF: {{ assistido.cpf_formatado }}{% endif %}
+    </div>
+  </div>
+
+  <a class="btn btn-outline-secondary" href="{% url 'atribuicoes:atribuicoes_lista' %}">
+    <i class="bi bi-arrow-left"></i> Voltar
+  </a>
+</div>
+
+{% if assistido.status != "ATIVO" %}
+<div class="alert alert-warning">
+  Este assistido está <strong>INATIVO</strong>. Não é permitido atribuir benefícios.
+</div>
+{% endif %}
+
+<form method="post" novalidate class="card shadow-sm">
+  {% csrf_token %}
+
+  <div class="card-body">
+
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="row g-3">
+
+      <!-- Benefício -->
+      <div class="col-12">
+        <label class="form-label" for="{{ form.beneficio.id_for_label }}">
+          {{ form.beneficio.label }}
+        </label>
+        {{ form.beneficio }}
+        {% if form.beneficio.help_text %}
+        <div class="form-text">{{ form.beneficio.help_text }}</div>
+        {% endif %}
+        {% if form.beneficio.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.beneficio.errors }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Vigência -->
+      <div class="col-md-6">
+        <label class="form-label" for="{{ form.data_inicio.id_for_label }}">
+          {{ form.data_inicio.label }}
+        </label>
+        {{ form.data_inicio }}
+        {% if form.data_inicio.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.data_inicio.errors }}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label" for="{{ form.data_termino.id_for_label }}">
+          {{ form.data_termino.label }}
+        </label>
+        {{ form.data_termino }}
+        <div class="form-text">Deixe em branco se ainda não houver data de encerramento.</div>
+        {% if form.data_termino.errors %}
+        <div class="text-danger small mt-1">
+          {{ form.data_termino.errors }}
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card-footer bg-body-tertiary d-flex flex-wrap gap-2">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check2-circle"></i>
+      {% if modo == "editar" %}Salvar Alterações{% else %}Salvar Atribuição{% endif %}
+    </button>
+    <a class="btn btn-outline-secondary" href="{% url 'atribuicoes:atribuicoes_lista' %}">
+      Cancelar
+    </a>
+  </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "operacoes/base.html" %}
+{% load querystring %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- TÍTULO -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Consulta — Situação Socioeconômica</h3>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">Busca (Nome / CPF / Telefone)</label>
+          <input type="text" name="q" value="{{ request.GET.q }}" class="form-control">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Status</label>
+          <select name="status" class="form-select">
+            <option value="">Todos</option>
+            <option value="ATIVO" {% if request.GET.status == "ATIVO" %}selected{% endif %}>Ativo</option>
+            <option value="INATIVO" {% if request.GET.status == "INATIVO" %}selected{% endif %}>Inativo</option>
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Situação de Trabalho</label>
+          <select name="sit_trabalho" class="form-select">
+            <option value="">Todos</option>
+            {% for valor, label in choices_sit_trabalho %}
+              <option value="{{ valor }}" {% if request.GET.sit_trabalho == valor %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Faixa de Renda</label>
+          <select name="faixa_renda" class="form-select">
+            <option value="">Todos</option>
+            {% for valor, label in choices_faixa_renda %}
+              <option value="{{ valor }}" {% if request.GET.faixa_renda == valor %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Tipo de Moradia</label>
+          <select name="tipo_moradia" class="form-select">
+            <option value="">Todos</option>
+            {% for valor, label in choices_tipo_moradia %}
+              <option value="{{ valor }}" {% if request.GET.tipo_moradia == valor %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Escolaridade</label>
+            <select name="escolaridade" class="form-select">
+                <option value="">Todos</option>
+                {% for valor, label in choices_escolaridade %}
+                <option value="{{ valor }}" {% if request.GET.escolaridade == valor %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Área de Risco</label>
+          <select name="area_risco" class="form-select">
+            <option value="">Todos</option>
+            {% for valor, label in choices_area_risco %}
+              <option value="{{ valor }}" {% if request.GET.area_risco == valor %}selected{% endif %}>
+                {{ label }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+          <button type="submit" class="btn btn-primary w-100">
+            Filtrar
+          </button>
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+          <a href="{% url 'consultas:socioeconomico_lista' %}"
+             class="btn btn-outline-secondary w-100">
+            Limpar
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- RESULTADOS -->
+  <div class="card shadow-sm">
+
+    <div class="card-header d-flex justify-content-between align-items-center">
+
+      <!-- Total -->
+      <div class="small">
+          <span class="text-secondary me-2">Total:</span>
+          <span class="px-3 py-1 border border-secondary rounded bg-light fw-semibold shadow-sm">
+             {{ total }}
+          </span>
+      </div>
+
+      <!-- Botão Imprimir -->
+      <a href="{% url 'consultas:socioeconomico_print' %}?{% qs_update request %}"
+         target="_blank"
+         class="btn btn-outline-dark btn-sm">
+        <i class="bi bi-printer"></i> Imprimir
+      </a>
+
+    </div>
+
+    <div class="card-body table-responsive">
+
+      <table class="table table-striped table-sm align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>
+              <a class="text-decoration-none" href="?{% sort_qs request 'nome' %}">
+                Nome {% sort_icon request 'nome' %}
+              </a>
+            </th>
+            <th>
+              <a class="text-decoration-none" href="?{% sort_qs request 'sit_trabalho' %}">
+                Trabalho {% sort_icon request 'sit_trabalho' %}
+              </a>
+            </th>
+            <th>
+              <a class="text-decoration-none" href="?{% sort_qs request 'faixa_renda' %}">
+                Renda {% sort_icon request 'faixa_renda' %}
+              </a>
+            </th>
+            <th>
+              <a class="text-decoration-none" href="?{% sort_qs request 'tipo_moradia' %}">
+                Moradia {% sort_icon request 'tipo_moradia' %}
+              </a>
+            </th>
+            <th>
+              <a class="text-decoration-none" href="?{% sort_qs request 'escolaridade' %}">
+                Escolaridade {% sort_icon request 'escolaridade' %}
+              </a>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for a in assistidos %}
+          <tr>
+            <td>
+              <a class="fw-semibold text-decoration-none"
+                 href="{% url 'assistidos:assistido_detail' a.id %}">
+                {{ a.nome|title }}
+              </a>
+            </td>
+
+            <td>{{ a.get_sit_trabalho_display|default:"—" }}</td>
+            <td>{{ a.get_faixa_renda_display|default:"—" }}</td>
+            <td>{{ a.get_tipo_moradia_display|default:"—" }}</td>
+            <td>{{ a.get_escolaridade_display|default:"—" }}</td>
+          </tr>
+
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">
+              Nenhum registro encontrado.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

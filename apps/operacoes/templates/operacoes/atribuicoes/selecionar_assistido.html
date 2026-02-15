@@ -1,0 +1,37 @@
+{% extends "operacoes/base.html" %}
+
+{% block title %}Nova Atribuição{% endblock %}
+
+{% block content %}
+  <h1>Nova Atribuição</h1>
+  <p>Selecione um assistido para atribuir um benefício.</p>
+
+  <table border="1" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in assistidos %}
+        <tr>
+          <td>{{ a.nome|title }}</td>
+          <td>
+            {% if pode_editar %}
+              <a href="{% url 'assistidos:assistido_beneficio_create' id=a.id %}">Selecionar</a>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="2">Nenhum assistido cadastrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p>
+    <a href="{% url 'atribuicoes:atribuicoes_lista' %}">Voltar</a>
+  </p>
+{% endblock %}

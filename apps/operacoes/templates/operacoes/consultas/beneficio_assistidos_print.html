@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório — Assistidos por Benefício</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h2 { margin: 0 0 6px 0; }
+    .sub { color: #444; margin: 0 0 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background: #f0f0f0; }
+    .encerrada { color: #777; }
+    @media print { @page { margin: 2cm; } }
+  </style>
+</head>
+<body>
+
+  <h2>Relatório — Assistidos por Benefício</h2>
+
+  <p class="sub">
+    Benefício:
+    <strong>
+      {% if beneficio_sel %}{{ beneficio_sel.nome }}{% else %}(não selecionado){% endif %}
+    </strong>
+    &nbsp;|&nbsp;
+    Status: <strong>{{ status|title }}</strong>
+    &nbsp;|&nbsp;
+    Total: <strong>{{ total }}</strong>
+  </p>
+
+  <hr>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Assistido</th>
+        <th style="width: 160px;">CPF</th>
+        <th style="width: 120px;">Status</th>
+        <th style="width: 120px;">Início</th>
+        <th style="width: 120px;">Término</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in atribuicoes %}
+        <tr class="{% if not a.ativo %}encerrada{% endif %}">
+          <td>{{ a.assistido.nome }}</td>
+          <td>{{ a.assistido.cpf|default:"—" }}</td>
+          <td>{% if a.ativo %}Ativa{% else %}Encerrada{% endif %}</td>
+          <td>{% if a.data_inicio %}{{ a.data_inicio|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+          <td>{% if a.data_termino %}{{ a.data_termino|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center; color:#666;">
+            Nenhum registro para os filtros informados.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+<script>
+  window.addEventListener("load", function () {
+    window.print();
+  });
+</script>
+
+</body>
+</html>

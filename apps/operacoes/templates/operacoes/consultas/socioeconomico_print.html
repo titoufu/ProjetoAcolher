@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Impressão — Situação Socioeconômica</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    @page {
+      margin: 25mm;
+    }
+
+    body {
+      font-size: 13px;
+    }
+
+    .no-print {
+      display: inline-block;
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h5>Consulta — Situação Socioeconômica</h5>
+      <div>
+        Gerado em: {% now "d/m/Y H:i" %}
+      </div>
+      <div>
+        Total de registros: {{ total }}
+      </div>
+      <div class="mt-2">
+        <strong>Filtros:</strong>
+        Busca: {{ request.GET.q|default:"—" }} |
+        Status: {{ request.GET.status|default:"Todos" }} |
+        Trabalho: {{ request.GET.sit_trabalho|default:"—" }} |
+        Renda: {{ request.GET.faixa_renda|default:"—" }} |
+        Moradia: {{ request.GET.tipo_moradia|default:"—" }} |
+        Área de Risco: {{ request.GET.area_risco|default:"—" }}
+      </div>
+    </div>
+
+    <div class="no-print">
+      <button class="btn btn-dark btn-sm" onclick="window.print()">
+        Imprimir
+      </button>
+    </div>
+  </div>
+
+  <hr>
+
+  <table class="table table-sm table-bordered">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Trabalho</th>
+        <th>Renda</th>
+        <th>Moradia</th>
+        <th>Escolaridade</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in assistidos %}
+      <tr>
+        <td>{{ a.nome|title }}</td>
+        <td>{{ a.get_sit_trabalho_display|default:"—" }}</td>
+        <td>{{ a.get_faixa_renda_display|default:"—" }}</td>
+        <td>{{ a.get_tipo_moradia_display|default:"—" }}</td>
+        <td>{{ a.get_escolaridade_display|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center">Nenhum registro encontrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    window.addEventListener("load", function() {
+      window.print();
+    });
+  </script>
+
+</body>
+</html>

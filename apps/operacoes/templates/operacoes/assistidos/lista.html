@@ -1,0 +1,128 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Assistidos{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 mb-0">Assistidos</h1>
+
+  {% if pode_editar %}
+    <a class="btn btn-primary"
+       href="{% url 'assistidos:assistido_create' %}">
+       <i class="bi bi-plus-circle"></i> Novo Assistido
+    </a>
+  {% endif %}
+</div>
+
+<form method="get" class="card shadow-sm mb-3">
+  <div class="card-body">
+    <div class="row g-2 align-items-end">
+
+      <div class="col-md-6">
+        <label class="form-label">Nome</label>
+        <input type="text"
+               name="nome"
+               value="{{ f_nome }}"
+               class="form-control"
+               placeholder="Digite parte do nome...">
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Mês de Nascimento</label>
+        <select name="mes" class="form-select">
+          <option value="">Todos</option>
+          <option value="1"  {% if f_mes == "1" %}selected{% endif %}>Janeiro</option>
+          <option value="2"  {% if f_mes == "2" %}selected{% endif %}>Fevereiro</option>
+          <option value="3"  {% if f_mes == "3" %}selected{% endif %}>Março</option>
+          <option value="4"  {% if f_mes == "4" %}selected{% endif %}>Abril</option>
+          <option value="5"  {% if f_mes == "5" %}selected{% endif %}>Maio</option>
+          <option value="6"  {% if f_mes == "6" %}selected{% endif %}>Junho</option>
+          <option value="7"  {% if f_mes == "7" %}selected{% endif %}>Julho</option>
+          <option value="8"  {% if f_mes == "8" %}selected{% endif %}>Agosto</option>
+          <option value="9"  {% if f_mes == "9" %}selected{% endif %}>Setembro</option>
+          <option value="10" {% if f_mes == "10" %}selected{% endif %}>Outubro</option>
+          <option value="11" {% if f_mes == "11" %}selected{% endif %}>Novembro</option>
+          <option value="12" {% if f_mes == "12" %}selected{% endif %}>Dezembro</option>
+        </select>
+      </div>
+
+      <div class="col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">
+          <i class="bi bi-funnel"></i> Filtrar
+        </button>
+      </div>
+
+    </div>
+
+    {% if f_nome or f_mes %}
+      <div class="mt-2">
+        <a class="btn btn-sm btn-outline-secondary"
+           href="{% url 'assistidos:assistidos_lista' %}">
+          Limpar filtros
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</form>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Nome</th>
+            <th>Telefone</th>
+            <th>Data Nasc.</th>
+            <th>Status</th>
+            <th>Endereço</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in assistidos %}
+          <tr>
+            <td>
+              <a class="fw-semibold text-decoration-none"
+                 href="{% url 'assistidos:assistido_detail' a.id %}">
+                 {{ a.nome|title }}
+              </a>
+            </td>
+
+            <td>
+              {{ a.telefone_formatado|default:"—" }}
+            </td>
+
+            <td>
+              {% if a.data_nascimento %}
+                {{ a.data_nascimento|date:"d/m/Y" }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+              {% if a.status == "ATIVO" %}
+                <span class="badge text-bg-success">Ativo</span>
+              {% else %}
+                <span class="badge text-bg-secondary">Inativo</span>
+              {% endif %}
+            </td>
+
+            <td class="text-muted">
+              {{ a.endereco_resumo|title }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted p-4">
+              Nenhum assistido cadastrado.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

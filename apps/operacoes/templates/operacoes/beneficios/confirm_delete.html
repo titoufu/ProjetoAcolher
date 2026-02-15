@@ -1,0 +1,13 @@
+{% extends "operacoes/beneficios/_base_beneficios.html" %}
+
+{% block beneficios_content %}
+  <h1>Remover benefício</h1>
+
+  <p>Confirma remover: <strong>{{ beneficio }}</strong>?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Sim, remover</button>
+    <a href="/operacoes/beneficios/{{ beneficio.id }}/">Cancelar</a>
+  </form>
+{% endblock %}

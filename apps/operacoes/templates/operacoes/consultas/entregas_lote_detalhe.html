@@ -1,0 +1,120 @@
+{% extends "operacoes/base.html" %}
+{% load querystring %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Consulta — Entregas (Detalhe do Lote)</h3>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <div class="d-flex gap-2 flex-wrap align-items-center small">
+                <span class="text-secondary">Total:</span>
+                <span class="px-3 py-1 border border-secondary rounded bg-light fw-semibold shadow-sm">{{ total}}</span>
+                <span class="badge text-bg-success">entregues #{{ entregues_count }}</span>
+                <span class="badge text-bg-secondary">pendentes #{{ pendentes_count }}</span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="{% url 'consultas:entregas_lotes_lista' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+
+                <a href="{% url 'consultas:entregas_lote_print' %}?{% qs_update request %}"
+                    class="btn btn-outline-dark btn-sm">
+                    <i class="bi bi-printer"></i> Imprimir
+                </a>
+            </div>
+
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <div class="fw-semibold">Lote #{{ lote.id }}</div>
+                <div class="text-muted small">
+                    Data: <strong>{{ lote.data_entrega|date:"d/m/Y" }}</strong>
+                    &nbsp;|&nbsp;
+                    Benefício: <strong>{{ lote.beneficio.nome }}</strong>
+                </div>
+            </div>
+
+            <!-- ENTREGUES -->
+            <div class="card shadow-sm mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="fw-semibold">
+                        Entregues
+                        <span class="badge text-bg-success ms-2">#{{ entregues_count }}</span>
+                    </div>
+                </div>
+
+                <div class="card-body table-responsive">
+                    <table class="table table-striped table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Assistido</th>
+                                <th style="width:160px;">CPF</th>
+                                <th style="width:160px;">Telefone</th>
+                                <th style="width:140px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in entregues %}
+                            <tr>
+                                <td class="fw-semibold">{{ i.atribuicao.assistido.nome|title }}</td>
+                                <td>{{ i.atribuicao.assistido.cpf|default:"—" }}</td>
+                                <td>{{ i.atribuicao.assistido.telefone_formatado|default:"—" }}</td>
+                                <td><span class="badge text-bg-success">Entregue</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Nenhum entregue.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- PENDENTES -->
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="fw-semibold">
+                        Pendentes
+                        <span class="badge text-bg-secondary ms-2">#{{ pendentes_count }}</span>
+                    </div>
+                </div>
+
+                <div class="card-body table-responsive">
+                    <table class="table table-striped table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Assistido</th>
+                                <th style="width:160px;">CPF</th>
+                                <th style="width:160px;">Telefone</th>
+                                <th style="width:140px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in pendentes %}
+                            <tr class="text-muted">
+                                <td class="fw-semibold">{{ i.atribuicao.assistido.nome|title }}</td>
+                                <td>{{ i.atribuicao.assistido.cpf|default:"—" }}</td>
+                                <td>{{ i.atribuicao.assistido.telefone_formatado|default:"—" }}</td>
+                                <td><span class="badge text-bg-secondary">Pendente</span></td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">Nenhum pendente.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    {% endblock %}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Impressão — Condições de Saúde</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    @page { margin: 25mm; }
+    body { font-size: 13px; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h5>Consulta — Condições de Saúde</h5>
+      <div>Gerado em: {% now "d/m/Y H:i" %}</div>
+      <div>Total de registros: <strong>{{ total }}</strong></div>
+
+      <div class="mt-2">
+        <strong>Filtros:</strong>
+        Busca: {{ request.GET.q|default:"—" }} |
+        Status: {{ request.GET.status|default:"Todos" }} |
+        Diabetes: {{ request.GET.diabetes|default:"—" }} |
+        Pressão Alta: {{ request.GET.pressao_alta|default:"—" }} |
+        Uso Contínuo: {{ request.GET.medic_uso_continuo|default:"—" }} |
+        Doença Permanente: {{ request.GET.doenca_permanente|default:"—" }}
+      </div>
+    </div>
+
+    <div class="no-print">
+      <button class="btn btn-dark btn-sm" onclick="window.print()">Imprimir</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <table class="table table-sm table-bordered">
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Diabetes</th>
+        <th>Pressão Alta</th>
+        <th>Remédio de <br> Uso Contínuo</th>
+        <th>Outras Condições<br>Crônicas</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in assistidos %}
+      <tr>
+        <td>{{ a.nome|title }}</td>
+        <td>{{ a.get_diabetes_display|default:"—" }}</td>
+        <td>{{ a.get_pressao_alta_display|default:"—" }}</td>
+        <td>{{ a.get_medic_uso_continuo_display|default:"—" }}</td>
+        <td>{{ a.get_doenca_permanente_display|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-center">Nenhum registro.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    window.addEventListener("load", () => window.print());
+  </script>
+
+</body>
+</html>

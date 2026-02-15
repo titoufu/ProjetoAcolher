@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Chamada — Lote #{{ lote.id }}</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h2 { margin: 0 0 6px 0; }
+    .sub { color: #444; margin: 0 0 12px 0; }
+    hr { border: 0; border-top: 1px solid #ccc; margin: 10px 0; }
+
+    .topbar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .btn {
+      padding: 6px 10px; border: 1px solid #ccc; background: #f8f8f8;
+      cursor: pointer; border-radius: 4px; font-size: 12px;
+    }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: middle; }
+    th { background: #f0f0f0; }
+
+    .chk {
+      width: 16px; height: 16px;
+      border: 2px solid #333;
+      display: inline-block;
+      border-radius: 2px;
+    }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    @media print {
+      @page { margin: 1.8cm; }
+      .topbar { display: none !important; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <button class="btn" type="button" onclick="voltar()">← Voltar</button>
+    <button class="btn" type="button" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+
+  <h2>Lista de Chamada — Entrega do Lote</h2>
+
+  <p class="sub">
+    Lote: <strong class="mono">#{{ lote.id }}</strong>
+    &nbsp;|&nbsp;
+    Data: <strong>{{ lote.data_entrega|date:"d/m/Y" }}</strong>
+    &nbsp;|&nbsp;
+    Benefício: <strong>{{ lote.beneficio.nome }}</strong>
+  </p>
+
+  <hr>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:55px;">OK</th>
+        <th>Nome (ordem alfabética)</th>
+        <th style="width:170px;">Telefone</th>
+        <th style="width:130px;">Data Nasc.</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {# 
+        IMPORTANTE:
+        - O ideal é o backend já enviar "itens" ordenado por assistido__nome.
+        - Se já vier ordenado, perfeito.
+        - Se NÃO vier ordenado, você pode ajustar na view depois.
+      #}
+
+      {% for item in itens %}
+        <tr>
+          <td style="text-align:center;">
+            <span class="chk"></span>
+          </td>
+          <td>{{ item.atribuicao.assistido.nome|title }}</td>
+          <td>{{ item.atribuicao.assistido.telefone_formatado }}</td>
+          <td>{{ item.atribuicao.assistido.data_nascimento|date:"d/m/Y" }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center; color:#666;">
+            Nenhum assistido encontrado para este lote.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    function voltar() {
+      if (document.referrer) window.location.href = document.referrer;
+      else window.history.back();
+    }
+    window.addEventListener("load", () => {
+      setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+    });
+  </script>
+
+</body>
+</html>

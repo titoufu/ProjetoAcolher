@@ -1,0 +1,92 @@
+{% load querystring %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório — Entregas (Lotes)</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h2 { margin: 0 0 6px 0; }
+    .sub { color: #444; margin: 0 0 12px 0; }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+    th { background: #f0f0f0; }
+
+    .topbar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .btn {
+      padding: 6px 10px; border: 1px solid #ccc; background: #f8f8f8;
+      cursor: pointer; border-radius: 4px; font-size: 12px;
+    }
+
+    @media print {
+      @page { margin: 2cm; }
+      .topbar { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <button class="btn" type="button" onclick="voltar()">← Voltar</button>
+    <button class="btn" type="button" onclick="window.print()">🖨 Imprimir</button>
+  </div>
+
+  <h2>Relatório — Entregas (Lotes)</h2>
+
+  <p class="sub">
+    Período:
+    <strong>{{ data_ini|default:"(não informado)" }}</strong>
+    até
+    <strong>{{ data_fim|default:"(não informado)" }}</strong>
+    {% if beneficio_sel %}
+      &nbsp;|&nbsp; Benefício: <strong>{{ beneficio_sel.nome|title }}</strong>
+    {% endif %}
+    &nbsp;|&nbsp; Total de lotes: <strong>{{ total }}</strong>
+  </p>
+
+  <hr>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width:140px;">Data</th>
+        <th>Benefício</th>
+        <th style="width:110px;">Total</th>
+        <th style="width:120px;">Entregues</th>
+        <th style="width:120px;">Pendentes</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in lotes %}
+        <tr>
+          <td>{{ l.data_entrega|date:"d/m/Y" }}</td>
+          <td>{{ l.beneficio.nome|title }}</td>
+          <td>{{ l.total }}</td>
+          <td>{{ l.entregues }}</td>
+          <td>{{ l.pendentes }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center; color:#666;">Nenhum lote encontrado.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    function voltar() {
+      if (document.referrer) {
+        window.location.href = document.referrer;
+      } else {
+        window.history.back();
+      }
+    }
+    window.addEventListener("load", () => {
+      setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,58 @@
+{% extends "operacoes/base.html" %}
+
+{% block title %}Nova Entrega{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Nova Entrega (Lote)</h2>
+    <a class="btn btn-outline-secondary" href="{% url 'entregas:lote_lista' %}">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form method="post" class="row g-3">
+        {% csrf_token %}
+
+        {# ✅ ERROS GERAIS DO FORM (ex: lote duplicado) #}
+        {% if form.non_field_errors %}
+          <div class="col-12">
+            <div class="alert alert-danger mb-0">
+              {{ form.non_field_errors }}
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="col-md-4">
+          <label class="form-label">Data da entrega</label>
+          {{ form.data_entrega }}
+          {% if form.data_entrega.errors %}
+            <div class="text-danger small">{{ form.data_entrega.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-8">
+          <label class="form-label">Benefício</label>
+          {{ form.beneficio }}
+          {% if form.beneficio.errors %}
+            <div class="text-danger small">{{ form.beneficio.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2-circle"></i> Criar lote
+          </button>
+          <a class="btn btn-outline-secondary" href="{% url 'entregas:lote_lista' %}">
+            Cancelar
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

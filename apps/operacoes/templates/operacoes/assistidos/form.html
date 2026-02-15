@@ -1,0 +1,341 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Assistidos{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h1 class="mb-1">
+      {% if modo == "criar" %}Novo Assistido{% else %}Editar Assistido{% endif %}
+    </h1>
+    <p class="text-muted mb-0">Cadastro de assistidos</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'assistidos:assistidos_lista' %}">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+  </div>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+ 
+     <!--CARD — IDENTIFICAÇÃO -->
+ 
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>Identificação</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label" for="{{ form.nome.id_for_label }}">Nome</label>
+          {{ form.nome }}
+          {% if form.nome.errors %}<div class="text-danger small">{{ form.nome.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.cpf.id_for_label }}">CPF</label>
+          {{ form.cpf }}
+          {% if form.cpf.errors %}<div class="text-danger small">{{ form.cpf.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.data_nascimento.id_for_label }}">Data de Nascimento</label>
+          {{ form.data_nascimento }}
+          {% if form.data_nascimento.errors %}<div class="text-danger small">{{ form.data_nascimento.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.telefone.id_for_label }}">Telefone</label>
+          {{ form.telefone }}
+          {% if form.telefone.errors %}<div class="text-danger small">{{ form.telefone.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- CARD — ENDEREÇO -->
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>Endereço</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label" for="{{ form.logradouro.id_for_label }}">Logradouro</label>
+          {{ form.logradouro }}
+          {% if form.logradouro.errors %}<div class="text-danger small">{{ form.logradouro.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label" for="{{ form.numero.id_for_label }}">Número</label>
+          {{ form.numero }}
+          {% if form.numero.errors %}<div class="text-danger small">{{ form.numero.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label" for="{{ form.cep.id_for_label }}">CEP</label>
+          {{ form.cep }}
+          {% if form.cep.errors %}<div class="text-danger small">{{ form.cep.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.complemento.id_for_label }}">Complemento</label>
+          {{ form.complemento }}
+          {% if form.complemento.errors %}<div class="text-danger small">{{ form.complemento.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.bairro.id_for_label }}">Bairro</label>
+          {{ form.bairro }}
+          {% if form.bairro.errors %}<div class="text-danger small">{{ form.bairro.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label" for="{{ form.cidade.id_for_label }}">Cidade</label>
+          {{ form.cidade }}
+          {% if form.cidade.errors %}<div class="text-danger small">{{ form.cidade.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-1">
+          <label class="form-label" for="{{ form.uf.id_for_label }}">UF</label>
+          {{ form.uf }}
+          {% if form.uf.errors %}<div class="text-danger small">{{ form.uf.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+     <!-- CARD — SITUAÇÃO SOCIOECONÔMICA -->
+ 
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>Situação Socioeconômica</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.sit_trabalho.id_for_label }}">Situação de Trabalho</label>
+          {{ form.sit_trabalho }}
+          {% if form.sit_trabalho.errors %}<div class="text-danger small">{{ form.sit_trabalho.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.responsavel_renda.id_for_label }}">Responsável pela Renda</label>
+          {{ form.responsavel_renda }}
+          {% if form.responsavel_renda.errors %}<div class="text-danger small">{{ form.responsavel_renda.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.faixa_renda.id_for_label }}">Faixa de Renda</label>
+          {{ form.faixa_renda }}
+          {% if form.faixa_renda.errors %}<div class="text-danger small">{{ form.faixa_renda.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.tipo_moradia.id_for_label }}">Tipo de Moradia</label>
+          {{ form.tipo_moradia }}
+          {% if form.tipo_moradia.errors %}<div class="text-danger small">{{ form.tipo_moradia.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.material_moradia.id_for_label }}">Material da Moradia</label>
+          {{ form.material_moradia }}
+          {% if form.material_moradia.errors %}<div class="text-danger small">{{ form.material_moradia.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.area_risco.id_for_label }}">Área de Risco</label>
+          {{ form.area_risco }}
+          {% if form.area_risco.errors %}<div class="text-danger small">{{ form.area_risco.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.sabe_ler_escrever.id_for_label }}">Sabe Ler/Escrever</label>
+          {{ form.sabe_ler_escrever }}
+          {% if form.sabe_ler_escrever.errors %}<div class="text-danger small">{{ form.sabe_ler_escrever.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.escolaridade.id_for_label }}">Escolaridade</label>
+          {{ form.escolaridade }}
+          {% if form.escolaridade.errors %}<div class="text-danger small">{{ form.escolaridade.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+     <!-- CARD — SAÚDE -->
+ 
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>Condições de Saúde</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label" for="{{ form.diabetes.id_for_label }}">Diabetes</label>
+          {{ form.diabetes }}
+          {% if form.diabetes.errors %}<div class="text-danger small">{{ form.diabetes.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label" for="{{ form.pressao_alta.id_for_label }}">Pressão Alta</label>
+          {{ form.pressao_alta }}
+          {% if form.pressao_alta.errors %}<div class="text-danger small">{{ form.pressao_alta.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label" for="{{ form.medic_uso_continuo.id_for_label }}">Medic. Uso Contínuo</label>
+          {{ form.medic_uso_continuo }}
+          {% if form.medic_uso_continuo.errors %}<div class="text-danger small">{{ form.medic_uso_continuo.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label" for="{{ form.doenca_permanente.id_for_label }}">Doença Permanente</label>
+          {{ form.doenca_permanente }}
+          {% if form.doenca_permanente.errors %}<div class="text-danger small">{{ form.doenca_permanente.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+    <!-- CARD — PROGRAMA -->
+  
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>Programa</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label" for="{{ form.data_inicio_apoio.id_for_label }}">Ingresso no Programa</label>
+          {{ form.data_inicio_apoio }}
+          {% if form.data_inicio_apoio.errors %}<div class="text-danger small">{{ form.data_inicio_apoio.errors }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+    <!-- CARD — STATUS -->
+ 
+  <div class="card shadow-sm mb-3">
+    <div class="card-header bg-body-tertiary">
+      <strong>Status</strong>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label" for="{{ form.status.id_for_label }}">Status</label>
+          {{ form.status }}
+          {% if form.status.errors %}<div class="text-danger small">{{ form.status.errors }}</div>{% endif %}
+        </div>
+
+        <div class="col-md-9" id="motivo-box">
+          <label class="form-label" for="{{ form.motivo_inativacao.id_for_label }}">Motivo da Inativação</label>
+          {{ form.motivo_inativacao }}
+          {% if form.motivo_inativacao.errors %}<div class="text-danger small">{{ form.motivo_inativacao.errors }}</div>{% endif %}
+          <div class="form-text">Só preencha se o status estiver como INATIVO.</div>
+        </div>
+      </div>
+
+      {% if modo == "editar" and assistido and assistido.status == "INATIVO" %}
+        <div class="alert alert-warning mt-3 mb-0">
+          <strong>Data de Inativação:</strong>
+          {{ assistido.data_inativacao|default:"(será definida automaticamente)" }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mt-3">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check2-circle"></i> Salvar
+    </button>
+    <a class="btn btn-outline-secondary" href="{% url 'assistidos:assistidos_lista' %}">
+      Cancelar
+    </a>
+  </div>
+</form>
+
+<script>
+  (function () {
+    const cpfField = document.getElementById("id_cpf");
+    const cepField = document.getElementById("id_cep");
+    const telField = document.getElementById("id_telefone");
+    const statusField = document.getElementById("id_status");
+    const motivoBox = document.getElementById("motivo-box");
+
+    function onlyDigits(v) {
+      return (v || "").replace(/\D/g, "");
+    }
+
+    function maskCpf(v) {
+      const d = onlyDigits(v).slice(0, 11);
+      if (d.length <= 3) return d;
+      if (d.length <= 6) return d.slice(0, 3) + "." + d.slice(3);
+      if (d.length <= 9) return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6);
+      return d.slice(0, 3) + "." + d.slice(3, 6) + "." + d.slice(6, 9) + "-" + d.slice(9);
+    }
+
+    function maskCep(v) {
+      const d = onlyDigits(v).slice(0, 8);
+      if (d.length <= 5) return d;
+      return d.slice(0, 5) + "-" + d.slice(5);
+    }
+
+    function maskTelefone(v) {
+      const d = onlyDigits(v).slice(0, 11); // DDD + 9 dígitos
+      if (d.length <= 2) return d; // só DDD
+      const ddd = d.slice(0, 2);
+      const resto = d.slice(2);
+
+      // fixo (8) ou celular (9)
+      if (resto.length <= 4) return `(${ddd}) ${resto}`;
+      if (resto.length <= 8) return `(${ddd}) ${resto.slice(0, 4)}-${resto.slice(4)}`;  // 8 dígitos
+      return `(${ddd}) ${resto.slice(0, 5)}-${resto.slice(5)}`; // 9 dígitos
+    }
+
+    function atualizarMotivo() {
+      if (!statusField || !motivoBox) return;
+      motivoBox.style.display = (statusField.value === "INATIVO") ? "" : "none";
+    }
+
+    if (cpfField) {
+      cpfField.addEventListener("input", function () {
+        cpfField.value = maskCpf(cpfField.value);
+      });
+    }
+
+    if (cepField) {
+      cepField.addEventListener("input", function () {
+        cepField.value = maskCep(cepField.value);
+      });
+    }
+
+    if (telField) {
+      telField.addEventListener("input", function () {
+        telField.value = maskTelefone(telField.value);
+      });
+      // já formata caso venha preenchido ao editar
+      telField.value = maskTelefone(telField.value);
+    }
+
+    if (statusField) {
+      statusField.addEventListener("change", atualizarMotivo);
+      atualizarMotivo();
+    }
+  })();
+</script>
+
+
+{% endblock %}

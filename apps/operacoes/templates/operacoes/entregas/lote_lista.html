@@ -1,0 +1,108 @@
+{% extends "operacoes/base.html" %}
+
+{% block title %}Entregas{% endblock %}
+
+{% block content %}
+<div class="container py-3">
+
+  <!-- Cabeçalho -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="mb-0">Lotes de Entrega</h2>
+    <a class="btn btn-primary" href="{% url 'entregas:lote_create' %}">
+      <i class="bi bi-plus-circle"></i> Nova Entrega
+    </a>
+  </div>
+
+  <!-- Card Filtro -->
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <form method="get" class="row g-3">
+
+        <div class="col-md-4">
+          <label class="form-label">Data inicial</label>
+          <input type="date" name="data_inicio" class="form-control"
+                 value="{{ data_inicio }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Data final</label>
+          <input type="date" name="data_fim" class="form-control"
+                 value="{{ data_fim }}">
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end gap-2">
+          <button type="submit" class="btn btn-outline-primary">
+            <i class="bi bi-search"></i> Filtrar
+          </button>
+          <a href="{% url 'entregas:lote_lista' %}" class="btn btn-outline-secondary">
+            Limpar
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- Card Lista -->
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Data</th>
+              <th>Benefício</th>
+              <th style="width: 170px;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lote in lotes %}
+              <tr>
+                <td>
+                  {{ lote.data_entrega|date:"d/m/Y" }}
+                </td>
+                <td>{{ lote.beneficio.nome }}</td>
+                <td>
+                  <div class="d-flex gap-2">
+
+                    <!-- Abrir -->
+                    <a class="btn btn-sm btn-outline-primary"
+                       href="{% url 'entregas:lote_detail' lote.id %}"
+                       title="Abrir checklist">
+                      <i class="bi bi-eye"></i>
+                    </a>
+
+                    <!-- Editar -->
+                    <a class="btn btn-sm btn-outline-warning"
+                       href="{% url 'entregas:lote_update' lote.id %}"
+                       title="Editar lote">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+
+                    <!-- Excluir -->
+                    <a class="btn btn-sm btn-outline-danger"
+                       href="{% url 'entregas:lote_delete' lote.id %}"
+                       title="Excluir lote">
+                      <i class="bi bi-trash"></i>
+                    </a>
+
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="3" class="text-muted">
+                  Nenhum lote encontrado no período.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

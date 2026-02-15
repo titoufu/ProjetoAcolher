@@ -1,0 +1,108 @@
+   <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório — Histórico de Entregas por Assistido</title>
+
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    h2 { margin: 0 0 6px 0; }
+    .sub { color: #555; margin: 0 0 10px 0; }
+    .box { margin: 10px 0 12px 0; padding: 8px; border: 1px solid #ddd; border-radius: 6px; background: #f8f8f8; }
+    .badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 999px; border: 1px solid #999; }
+    .b-ok { border-color: #2e7d32; color: #2e7d32; }
+    .b-pend { border-color: #666; color: #666; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: top; }
+    th { background: #f0f0f0; }
+    .muted { color: #777; }
+
+    @media print { @page { margin: 2cm; } }
+  </style>
+</head>
+
+<body>
+
+  <h2>Relatório — Histórico de Entregas por Assistido</h2>
+
+  <p class="sub">
+    {% if q %}<strong>Busca:</strong> {{ q }} &nbsp;|&nbsp;{% endif %}
+    {% if data_ini %}<strong>De:</strong> {{ data_ini }} &nbsp;{% endif %}
+    {% if data_fim %}<strong>Até:</strong> {{ data_fim }} &nbsp;{% endif %}
+    {% if beneficio_id %}
+      &nbsp;|&nbsp;<strong>Benefício:</strong>
+      {% for b in beneficios %}
+        {% if b.id|stringformat:"s" == beneficio_id|stringformat:"s" %}
+          {{ b.nome }} #{{ b.id }}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    {% if status %}&nbsp;|&nbsp;<strong>Status:</strong> {{ status|title }}{% endif %}
+  </p>
+
+  <div class="box">
+    <div><strong>Total:</strong> {{ total }}</div>
+    <div class="badges">
+      <span class="badge b-ok">Entregues #{{ entregues_count }}</span>
+      <span class="badge b-pend">Pendentes #{{ pendentes_count }}</span>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Assistido</th>
+        <th style="width:110px;">Data</th>
+        <th>Benefício</th>
+        <th style="width:90px;">Status</th>
+        <th style="width:70px;">Lote</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for i in itens %}
+        <tr class="{% if not i.entregue %}muted{% endif %}">
+          <td>{{ i.atribuicao.assistido.nome|title }}</td>
+          <td>{{ i.lote.data_entrega|date:"d/m/Y" }}</td>
+          <td>{{ i.lote.beneficio.nome }}</td>
+          <td>
+            {% if i.entregue %}Entregue{% else %}Pendente{% endif %}
+          </td>
+          <td>#{{ i.lote.id }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" style="text-align:center; color:#666;">Nenhum registro encontrado.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    // fluxo robusto: imprime e volta para a consulta
+    (function () {
+      function voltar() {
+        // se veio da tela da consulta, volta para ela
+        if (document.referrer) {
+          try { window.location.href = document.referrer; return; } catch (e) {}
+        }
+        try { window.history.back(); } catch (e) {}
+      }
+
+      window.addEventListener("load", function () {
+        setTimeout(function () {
+          try { window.print(); } catch (e) {}
+        }, 200);
+      });
+
+      window.onafterprint = function () {
+        // evita ficar “preso” no print
+        setTimeout(voltar, 200);
+      };
+    })();
+  </script>
+
+</body>
+</html>

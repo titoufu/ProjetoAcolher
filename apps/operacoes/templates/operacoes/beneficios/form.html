@@ -1,0 +1,44 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Benefícios{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <div>
+    <h1 class="h4 mb-1">
+      {% if modo == "novo" %}Novo benefício{% else %}Editar benefício{% endif %}
+    </h1>
+    <p class="text-muted mb-0">Cadastro de benefícios (catálogo)</p>
+  </div>
+
+  <a class="btn btn-outline-secondary" href="{% url 'beneficios:beneficio_lista' %}">
+    <i class="bi bi-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<form method="post" class="card shadow-sm">
+  {% csrf_token %}
+
+  <div class="card-body">
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
+    {# Render simples e consistente. Se depois quiser, montamos por campos em grid. #}
+    {{ form.as_p }}
+  </div>
+
+  <div class="card-footer bg-body-tertiary d-flex flex-wrap gap-2">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check2-circle"></i> Salvar
+    </button>
+
+    <a class="btn btn-outline-secondary" href="{% url 'beneficios:beneficio_lista' %}">
+      Cancelar
+    </a>
+  </div>
+</form>
+
+{% endblock %}

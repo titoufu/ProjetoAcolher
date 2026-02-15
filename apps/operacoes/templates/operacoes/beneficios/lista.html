@@ -1,0 +1,58 @@
+{% extends "operacoes/base.html" %}
+{% block title %}Benefícios{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h4 mb-0">Benefícios</h1>
+
+  {% if pode_editar %}
+    <a class="btn btn-primary" href="{% url 'beneficios:beneficio_create' %}">
+      <i class="bi bi-plus-circle"></i> Novo Benefício
+    </a>
+  {% endif %}
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            {% for field in fields %}
+              <th>{{ field.verbose_name|title }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for beneficio, valores in linhas %}
+            <tr>
+              {% for valor in valores %}
+                {% if forloop.first %}
+                  <td>
+                    <a class="fw-semibold text-decoration-none"
+                       href="{% url 'beneficios:beneficio_detail' id=beneficio.id %}">
+                      {{ valor }}
+                    </a>
+                  </td>
+                {% else %}
+                  <td>{{ valor }}</td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="{{ fields|length }}" class="text-center text-muted p-4">
+                Nenhum benefício cadastrado.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

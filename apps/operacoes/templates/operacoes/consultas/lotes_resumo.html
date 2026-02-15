@@ -1,0 +1,114 @@
+{% extends "operacoes/base.html" %}
+
+{% block title %}Consultas | Resumo de Lotes{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+      <h3 class="mb-0">Resumo de Lotes</h3>
+      <div class="text-muted small">Totais por lote (entregues, pendentes e percentual).</div>
+    </div>
+
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'operacoes_home' %}">
+      <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+  </div>
+
+  <form class="row g-2 align-items-end mb-3" method="get">
+    <div class="col-12 col-md-5">
+      <label class="form-label">Benefício</label>
+      <select name="beneficio_id" class="form-select">
+        <option value="">Todos</option>
+        {% for b in beneficios %}
+          <option value="{{ b.id }}" {% if beneficio_id|add:"" == b.id|stringformat:"s" %}selected{% endif %}>
+            {{ b.nome }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <label class="form-label">Data início</label>
+      <input type="date" name="data_ini" value="{{ data_ini }}" class="form-control">
+    </div>
+
+    <div class="col-6 col-md-3">
+      <label class="form-label">Data fim</label>
+      <input type="date" name="data_fim" value="{{ data_fim }}" class="form-control">
+    </div>
+
+    <div class="col-12 col-md-1 d-grid">
+      <button class="btn btn-primary">
+        <i class="bi bi-funnel"></i>
+      </button>
+    </div>
+  </form>
+
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th style="width: 90px;">Lote</th>
+          <th>Benefício</th>
+          <th style="width: 120px;">Data</th>
+          <th class="text-end" style="width: 80px;">Total</th>
+          <th class="text-end" style="width: 95px;">Ent.</th>
+          <th class="text-end" style="width: 95px;">Pend.</th>
+          <th style="width: 200px;">Progresso</th>
+          <th class="text-end" style="width: 70px;">%</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for l in lotes %}
+          {% with total=l.total|default:0 ent=l.entregues|default:0 pend=l.pendentes|default:0 %}
+          {% if total > 0 %}
+            {% widthratio ent total 100 as pct %}
+          {% else %}
+            {% with 0 as pct %}
+            {% endwith %}
+          {% endif %}
+
+          <tr>
+            <td><span class="badge text-bg-secondary">#{{ l.id }}</span></td>
+            <td>{{ l.beneficio.nome }}</td>
+            <td>
+              {% if campo_data == "data_entrega" %}
+                {{ l.data_entrega|date:"Y-m-d" }}
+              {% else %}
+                {{ l.data|date:"Y-m-d" }}
+              {% endif %}
+            </td>
+
+            <td class="text-end">{{ total }}</td>
+            <td class="text-end">{{ ent }}</td>
+            <td class="text-end">{{ pend }}</td>
+
+            <td>
+              <div class="progress" style="height: 10px;">
+                <div class="progress-bar" role="progressbar" style="width: {{ pct }}%;" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+              <div class="small text-muted mt-1">
+                {% if total == 0 %}Lote vazio{% else %}{{ ent }} de {{ total }} entregues{% endif %}
+              </div>
+            </td>
+
+            <td class="text-end">
+              {% if total == 0 %}—{% else %}{{ pct }}%{% endif %}
+            </td>
+          </tr>
+
+          {% endwith %}
+        {% empty %}
+          <tr>
+            <td colspan="8" class="text-center text-muted py-4">Nenhum lote encontrado.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
