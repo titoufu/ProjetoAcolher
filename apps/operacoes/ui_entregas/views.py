@@ -139,32 +139,3 @@ def lote_delete(request, id):
         "operacoes/entregas/lote_confirm_delete.html",
         {"lote": lote, "entregues_count": entregues_count},
     )
-@login_required
-def lote_print(request, id):
-    lote = get_object_or_404(
-        LoteEntrega.objects.select_related("beneficio"),
-        id=id
-    )
-
-    itens = (
-        ItemEntrega.objects
-        .select_related("atribuicao__assistido")
-        .filter(lote=lote)
-        .order_by("atribuicao__assistido__nome")
-    )
-
-    total = itens.count()
-    entregues = itens.filter(entregue=True).count()
-    pendentes = total - entregues
-
-    context = {
-        "lote": lote,
-        "itens": itens,
-        "total": total,
-        "entregues": entregues,
-        "pendentes": pendentes,
-    }
-
-    # ✅ AQUI é onde o rename impacta:
-    return render(request, "operacoes/entregas/lote_detalhe_print.html", context)
-    
