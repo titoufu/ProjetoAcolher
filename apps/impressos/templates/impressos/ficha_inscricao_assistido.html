@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ficha de Inscrição — Projeto Acolher</title>
+
+  <style>
+    /* =========================
+       IMPRESSÃO
+    ========================== */
+    @page {
+      size: A4;
+      margin: 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #1f2937;
+      font-size: 11.0pt;
+      line-height: 1.25;
+      /* MAIS AREJADO */
+      background: #fff;
+    }
+
+    .page {
+      min-height: calc(297mm - 28mm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      /* MAIS AREJADO */
+    }
+
+    .page+.page {
+      page-break-before: always;
+    }
+
+    /* =========================
+       CABEÇALHO (SÓ PÁG 1)
+       - Mais “alto” e espaçado
+    ========================== */
+    .header {
+      border: 1.2px solid #1f5f8a;
+      border-radius: 14px;
+      /* mais arredondado */
+      overflow: hidden;
+    }
+
+    .header-bar {
+      background: #2f6f9c;
+      color: #fff;
+      padding: 14px 16px;
+      /* MAIOR ESPAÇAMENTO */
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      /* Permite que os itens quebrem a linha se não houver espaço suficiente */
+      flex-wrap: wrap;
+      /* Alinha os itens ao início caso haja quebra de linha */
+      align-items: flex-start;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      /* Deixa o "brand" crescer para ocupar o máximo de espaço possível */
+      flex-grow: 1;
+      /* Limita a largura máxima para dar espaço para o "right-pill" */
+      max-width: 70%;
+      /* Ajuste este valor (e.g., 65%, 75%) conforme a necessidade */
+      /* Remove o min-width para não impedir o encolhimento */
+      min-width: unset;
+      /* Remove a propriedade min-width: 0; original */
+    }
+
+    .brand img {
+      width: 48px;
+      /* um pouco maior */
+      height: 48px;
+      border-radius: 999px;
+      background: #fff;
+      padding: 4px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .brand-text .title {
+      /* Diminuí a fonte para dar mais espaço */
+      font-size: 14pt;
+      font-weight: 800;
+      /* Removido white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+         para permitir que o texto quebre a linha se for muito longo */
+      letter-spacing: .2px;
+    }
+
+    .brand-text .subtitle {
+      font-size: 10.5pt;
+      opacity: .95;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .right-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      font-weight: 800;
+      font-size: 11.5pt;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .14);
+      border: 1px solid rgba(255, 255, 255, .18);
+      /* Garante que o "Projeto Acolher" não encolha */
+      flex-shrink: 0;
+      /* Empurra a pílula para a direita (se houver espaço) ou para a próxima linha */
+      margin-left: auto;
+    }
+
+    /* =========================
+       TÍTULO DO DOCUMENTO
+    ========================== */
+    .doc-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 20px 20px 20px 20px;
+    }
+
+    .doc-title h1 {
+      margin: 0;
+      font-size: 14.5pt;
+    }
+
+    .doc-title .meta {
+      font-size: 9.8pt;
+      color: #4b5563;
+      white-space: nowrap;
+    }
+
+    /* =========================
+       “RETÂNGULOS” DAS SEÇÕES
+       (cantos arredondados + separação visual)
+    ========================== */
+    .section {
+      border: 1px solid #cfd8e3;
+      border-radius: 14px;
+      padding: 11px 11px 11px 11px;
+      /* MAIS AREJADO */
+      background: #ffffff;
+      box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      /* MAIS AREJADO */
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #d7e2ef;
+    }
+
+    .section-head .label {
+      font-weight: 900;
+      color: #0f3550;
+      font-size: 11.5pt;
+    }
+
+    .section-head .hint {
+      font-size: 9.3pt;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    /* =========================
+       CAMPOS (linhas para preencher)
+    ========================== */
+    .grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .g-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ESTILO GERAL PARA TODOS OS CAMPOS */
+    .field {
+      display: flex;
+      /* Permite que o label e a linha fiquem lado a lado */
+      align-items: flex-end;
+      /* Alinha o texto do label com a base da linha */
+      padding-top: 8px;
+      /* Espaço entre as linhas de cima */
+    }
+
+    .field .lbl {
+      white-space: nowrap;
+      /* Impede que o texto do label quebre */
+      margin-right: 5px;
+      /* Espaço entre o label e a linha */
+      /* Opcional: Se quiser que os labels sejam mais "fortes" */
+      font-weight: 600;
+      /* Para o texto do label ficar um pouco mais visível */
+    }
+
+    .field .line {
+      flex-grow: 1;
+      /* Faz a linha ocupar todo o espaço restante */
+      border-bottom: 1px solid black;
+      /* A própria linha */
+      min-height: 1.2em;
+      /* Garante que a linha tenha altura mínima */
+    }
+
+    .field.with-two-lines {
+      /* Nova classe para campos com duas linhas (como anotações) */
+      flex-direction: column;
+      /* Coloca lbl e as linhas uma abaixo da outra */
+      align-items: flex-start;
+      /* Alinha o label à esquerda */
+    }
+
+    .field.with-two-lines .lbl {
+      margin-bottom: 5px;
+      /* Espaço entre o label e a primeira linha */
+      margin-right: 0;
+      /* Não precisa de margem à direita aqui */
+    }
+
+    .field.with-two-lines .line {
+      width: 100%;
+      /* Linha ocupa toda a largura disponível */
+      margin-bottom: 5px;
+      /* Espaço entre as linhas */
+    }
+
+
+    /* --- Ajustes específicos para a seção de assinaturas --- */
+
+    /* Estilo para a declaração, adicionando a margem inferior que você queria */
+    .choice-title {
+      /* Removendo ou definindo margin-bottom para 0, já que ele é um item flex agora */
+      margin-bottom: 0px;
+      font-size: 10pt;
+      /* Manter a fonte consistente com o texto adjacente */
+      padding: 3px 7px;
+      /* Reduzir padding da pílula para economizar espaço (era 4px 8px) */
+    }
+
+    /* Configuração do grid de assinaturas */
+    .signature-grid {
+      display: grid;
+      /* Define duas colunas. A primeira é maior (2 partes), a segunda é menor (1 parte) */
+      grid-template-columns: 2fr 1fr;
+      /* Ou use percentagens como 70% 30% */
+      gap: 20px;
+      /* Espaço entre as colunas e linhas do grid */
+      align-items: start;
+      /* Alinha os itens do grid ao topo */
+    }
+
+    /* O campo de assinatura vai ocupar a primeira coluna (mais larga) */
+    .signature-field {
+      grid-column: 1;
+    }
+
+    /* O campo da data vai ocupar a segunda coluna (mais estreita e à direita) */
+    .date-field {
+      grid-column: 2;
+    }
+
+    /* O campo do responsável vai ocupar as duas colunas, ficando abaixo dos outros */
+    .full-width-field {
+      grid-column: 1 / -1;
+      /* Ocupa da primeira à última coluna */
+    }
+
+    /* Para as duas linhas de assinatura, se elas precisam ficar uma embaixo da outra */
+    .signature-field .line:nth-child(2) {
+      /* Garante que a segunda linha fique abaixo da primeira */
+      width: 100%;
+      /* Ocupa a largura total disponível */
+      margin-left: 0;
+      /* Remove a margem extra se não for desejada */
+    }
+
+    .signature-field .line:nth-child(3) {
+      /* Garante que a terceira linha fique abaixo da segunda */
+      width: 100%;
+      /* Ocupa a largura total disponível */
+      margin-left: 0;
+      /* Remove a margem extra se não for desejada */
+    }
+
+    .line {
+      height: 20px;
+      border-bottom: 1px solid #111827;
+    }
+
+    .line.tall {
+      height: 44px;
+    }
+
+    /* =========================
+       CHOICES — LABEL + OPÇÕES NA MESMA LINHA
+       (mais limpo e mais “arejado”)
+    ========================== */
+    .choice-line {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 4px 0;
+    }
+
+    .choice-title {
+      font-weight: 900;
+      font-size: 10.5pt;
+      color: #0b2d45;
+      background: #eef6ff;
+      border: 1px solid #cfe6ff;
+      padding: 4px 8px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    .choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 12px;
+      /* MAIS AREJADO */
+      align-items: center;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    /* Pílulas */
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10.6pt;
+      white-space: nowrap;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 4px 10px;
+      /* MAIS AREJADO */
+      background: #fff;
+    }
+
+    .box {
+      width: 14px;
+      height: 14px;
+      border: 1.8px solid #111827;
+      border-radius: 3px;
+      background: #fff;
+      display: inline-block;
+      transform: translateY(0.5px);
+    }
+
+    /* =========================
+       RODAPÉ — SÓ PÁG 1
+    ========================== */
+    .footer {
+      margin-top: auto;
+      padding-top: 10px;
+      font-size: 9.2pt;
+      color: #334155;
+      border-top: 1px dashed #cfd8e3;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .mission {
+      max-width: 78%;
+    }
+
+    .page-num {
+      white-space: nowrap;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =========================
+       PÁGINA 1 — FRENTE (COM CABEÇALHO + RODAPÉ)
+  ========================== -->
+  <div class="page">
+
+    <div class="header">
+      <div class="header-bar">
+        <div class="brand">
+          <img src="logo.png" alt="Logo" />
+          <div class="brand-text">
+            <div class="title">Lar Espírita Maria Lobato de Freitas</div>
+            <div class="subtitle">Sistema de Gestão de Assistidos</div>
+          </div>
+        </div>
+        <div class="right-pill">👥 Projeto Acolher</div>
+      </div>
+    </div>
+
+    <div class="doc-title">
+      <h1>Ficha de Inscrição do Assistido</h1>
+      <div class="meta">Uso interno: Código ________ | Data ____/____/______</div>
+    </div>
+
+    <!-- 1) IDENTIFICAÇÃO -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">1. Identificação</div>
+      </div>
+
+      <div class="grid g-2">
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="lbl">Nome:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">CPF:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Telefone/Celular:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Data de nascimento:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Idade:</div>
+          <div class="line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2) ENDEREÇO -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">2. Endereço</div>
+      </div>
+
+      <div class="grid g-2">
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="lbl">Logradouro:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Número:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Complemento:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Bairro:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">Cidade:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">UF:</div>
+          <div class="line"></div>
+        </div>
+
+        <div class="field">
+          <div class="lbl">CEP:</div>
+          <div class="line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3) SOCIOECONÔMICO -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">3. Situação Socioeconômica</div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Situação de Trabalho</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Empregado</span>
+          <span class="opt"><span class="box"></span> Desempregado</span>
+          <span class="opt"><span class="box"></span> Autônomo</span>
+          <span class="opt"><span class="box"></span> Aposentado</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Responsável pela Renda</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Assistido</span>
+          <span class="opt"><span class="box"></span> Cônjuge</span>
+          <span class="opt"><span class="box"></span> Outro</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Faixa de Renda</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Até 1 SM</span>
+          <span class="opt"><span class="box"></span> De 1 a 2 SM</span>
+          <span class="opt"><span class="box"></span> Acima de 2 SM</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Área de risco?</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Sim</span>
+          <span class="opt"><span class="box"></span> Não</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RODAPÉ — SÓ NA PÁGINA 1 -->
+    <div class="footer">
+      <div class="mission">
+        <strong>Nossa Missão:</strong> promover o ser humano em seu desenvolvimento moral e espiritual,
+        acolhendo-o fraternalmente, propiciando o estudo, a divulgação e a prática da doutrina espírita.
+      </div>
+      <div class="page-num">Página 1/2</div>
+    </div>
+
+  </div>
+
+
+  <!-- =========================
+       PÁGINA 2 — VERSO (SEM CABEÇALHO E SEM RODAPÉ)
+  ========================== -->
+  <div class="page">
+
+    <div class="doc-title">
+      <h1>Ficha de Inscrição do Assistido</h1>
+      <div class="meta">Continuação (verso)</div>
+    </div>
+
+    <!-- 3) SOCIOECONÔMICO (continuação) -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">3. Situação Socioeconômica (continuação)</div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Tipo de Moradia</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Própria</span>
+          <span class="opt"><span class="box"></span> Alugada</span>
+          <span class="opt"><span class="box"></span> Cedida</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Material da Moradia</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Alvenaria</span>
+          <span class="opt"><span class="box"></span> Madeira</span>
+          <span class="opt"><span class="box"></span> Mista</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Sabe ler e escrever?</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Sim</span>
+          <span class="opt"><span class="box"></span> Não</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Escolaridade</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Fundamental</span>
+          <span class="opt"><span class="box"></span> Médio</span>
+          <span class="opt"><span class="box"></span> Superior</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4) SAÚDE -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">4. Saúde</div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Diabetes</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Sim</span>
+          <span class="opt"><span class="box"></span> Não</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Pressão Alta</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Sim</span>
+          <span class="opt"><span class="box"></span> Não</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Uso contínuo</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Sim</span>
+          <span class="opt"><span class="box"></span> Não</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+
+      <div class="choice-line">
+        <div class="choice-title">Condição crônica</div>
+        <div class="choices">
+          <span class="opt"><span class="box"></span> Sim</span>
+          <span class="opt"><span class="box"></span> Não</span>
+          <span class="opt"><span class="box"></span> Não informado</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5) PROGRAMA / STATUS / ASSINATURAS -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">5. Programa, Status</div>
+      </div>
+      <div class="grid g-2">
+        <div class="field">
+          <div class="lbl">Data de Ingresso no Projeto no LAr:</div>
+          <div class="line"></div>
+        </div>
+        <div class="field" style="grid-column: 1 / -1;">
+          <div class="lbl">Recebe apoio de Outros Projetos:</div>
+          <div class="line"></div>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-head">
+        <div class="label">6. Assinaturas</div>
+      </div>
+      <div class="field" style="grid-column: 1 / -1; display:flex; flex-direction:column; align-items:flex-start;">
+        <div style="display: flex; align-items: baseline; flex-wrap: wrap;">
+          <div class="choice-title" style="margin-right: 5px;">Declaração:</div>
+          <span style="font-size:10.2pt; color:#4b5563;">
+            Declaro que as informações acima são verdadeiras e autorizo o uso dos dados para fins administrativos do
+            Projeto Acolher.
+          </span>
+        </div>
+      </div>
+
+      <!-- NOVO BLOCO FLEX PARA ALINHAR ASSINATURA E DATA -->
+      <div style="display: flex; justify-content: space-between; gap: 20px; margin-top: 15px;">
+        <!-- Campo da Assinatura do Assistido -->
+        <div class="field" style="flex: 2;"> <!-- Dá 2x mais espaço para a assinatura -->
+          <div class="lbl">Assinatura do Assistido:</div>
+          <div class="line"></div>
+          <div class="line"></div> <!-- Segunda linha para a assinatura -->
+        </div>
+
+        <!-- Campo da Data -->
+        <div class="field" style="flex: 1;"> <!-- Dá 1x espaço para a data -->
+          <div class="lbl">Data:</div>
+          <div class="line"></div>
+        </div>
+      </div>
+
+      <!-- Campo do Responsável pelo atendimento (linha completa abaixo) -->
+      <div class="field" style="margin-top: 15px;"> <!-- Adiciona um espaço acima para separar -->
+        <div class="lbl">Responsável pelo atendimento:</div>
+        <div class="line"></div>
+      </div>
+    </div>
+
+    <!-- 7) OBERVAÇÕES (SEÇÃO EXCLUSIVA, MAIS ESPAÇO) -->
+    <!-- 7) OBERVAÇÕES (SEÇÃO EXCLUSIVA, MAIS ESPAÇO) -->
+    <div class="section">
+      <div class="section-head">
+        <div class="label">7. Observações: (anotações do atendimento)</div>
+      </div>
+      <div class="field with-two-lines"> <!-- Adicionada a classe with-two-lines aqui -->
+        <div class="lbl">Anotações</div>
+        <div class="line"></div>
+        <div class="line"></div>
+      </div>
+    </div>
+  </div>
+  <script>
+  window.onload = function() {
+      window.print();
+  };
+</script>
+</body>
+</html>
