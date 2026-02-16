@@ -1,17 +1,16 @@
-  # apps/operacoes/services/entregas_queries.py
+# apps/operacoes/services/entregas_queries.py
 from __future__ import annotations
 
 from datetime import date
 from typing import Optional, Tuple
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, QuerySet
+from django.shortcuts import get_object_or_404
 
-from apps.beneficios.models import LoteEntrega, ItemEntrega, Beneficio, BeneficioAssistido
-from apps.assistidos.models import Assistido
+from apps.beneficios.models import Beneficio, ItemEntrega, LoteEntrega
 
 
 def _parse_date(s: str) -> Optional[date]:
-    """Aceita 'YYYY-MM-DD'. Retorna None se vazio/ inválido."""
     s = (s or "").strip()
     if not s:
         return None
@@ -22,28 +21,37 @@ def _parse_date(s: str) -> Optional[date]:
 
 
 def _normalize_status(status: str) -> str:
+    """
+    Aceita: todos / entregue(s) / pendente(s)
+    Normaliza para: todos / entregue / pendente
+    """
     status = (status or "todos").strip().lower()
-    if status not in {"todos", "entregue", "pendente"}:
-        status = "todos"
-    return status
+    mapa = {
+        "todos": "todos",
+        "entregue": "entregue",
+        "entregues": "entregue",
+        "pendente": "pendente",
+        "pendentes": "pendente",
+    }
+    return mapa.get(status, "todos")
+
+
+def opcoes_beneficios() -> QuerySet[Beneficio]:
+    return Beneficio.objects.order_by("nome", "id")
 
 
 def lotes_com_resumo(
     *,
-    q: str = "",
     data_ini: str = "",
     data_fim: str = "",
     beneficio_id: str = "",
-):
+    order_by: str = "-data_entrega",
+) -> QuerySet[LoteEntrega]:
     """
-    QuerySet de LoteEntrega com anotações:
-      - total_itens
-      - entregues
-      - pendentes
-    e filtros opcionais por:
-      - benefício
-      - intervalo de data
-      - texto (nome do benefício ou ID do lote)
+    Retorna LoteEntrega com:
+      - total (Count itens)
+      - entregues (Count itens entregues)
+      - pendentes (Count itens pendentes)
     """
     qs = LoteEntrega.objects.select_related("beneficio")
 
@@ -54,28 +62,68 @@ def lotes_com_resumo(
     if df:
         qs = qs.filter(data_entrega__lte=df)
 
+    beneficio_id = (beneficio_id or "").strip()
     if beneficio_id:
         try:
-            bid = int(beneficio_id)
-            qs = qs.filter(beneficio_id=bid)
+            qs = qs.filter(beneficio_id=int(beneficio_id))
         except ValueError:
             pass
 
-    q = (q or "").strip()
-    if q:
-        # busca por: nome do benefício ou ID do lote
-        cond = Q(beneficio__nome__icontains=q)
-        if q.isdigit():
-            cond |= Q(id=int(q))
-        qs = qs.filter(cond)
-
     qs = qs.annotate(
-        total_itens=Count("itens", distinct=True),
+        total=Count("itens", distinct=True),
         entregues=Count("itens", filter=Q(itens__entregue=True), distinct=True),
         pendentes=Count("itens", filter=Q(itens__entregue=False), distinct=True),
-    ).order_by("-data_entrega", "-id")
+    )
 
-    return qs
+    # fallback seguro de ordenação
+    allowed = {
+        "data_entrega", "-data_entrega",
+        "beneficio__nome", "-beneficio__nome",
+        "total", "-total",
+        "entregues", "-entregues",
+        "pendentes", "-pendentes",
+    }
+    order = order_by if order_by in allowed else "-data_entrega"
+    return qs.order_by(order, "-id")
+
+
+def itens_do_lote(
+    *,
+    lote_id: str,
+    order_by: str = "atribuicao__assistido__nome",
+) -> Tuple[LoteEntrega, QuerySet[ItemEntrega], QuerySet[ItemEntrega], QuerySet[ItemEntrega]]:
+    """
+    Retorna:
+      (lote, itens_qs, entregues_qs, pendentes_qs)
+    """
+    lote_id = (lote_id or "").strip()
+    lote_int = int(lote_id)  # se vier inválido, explode aqui (ok: view já garante fluxo)
+    lote = get_object_or_404(LoteEntrega.objects.select_related("beneficio"), id=lote_int)
+
+    allowed = {
+        "atribuicao__assistido__nome",
+        "-atribuicao__assistido__nome",
+        "entregue",
+        "-entregue",
+    }
+    order = order_by if order_by in allowed else "atribuicao__assistido__nome"
+
+    itens_qs = (
+        ItemEntrega.objects
+        .select_related(
+            "lote",
+            "lote__beneficio",
+            "atribuicao",
+            "atribuicao__assistido",
+            "atribuicao__beneficio",
+        )
+        .filter(lote_id=lote.id)
+        .order_by(order)
+    )
+
+    entregues = itens_qs.filter(entregue=True)
+    pendentes = itens_qs.filter(entregue=False)
+    return lote, itens_qs, entregues, pendentes
 
 
 def historico_itens_por_assistido(
@@ -85,19 +133,24 @@ def historico_itens_por_assistido(
     data_fim: str = "",
     beneficio_id: str = "",
     status: str = "todos",
-):
+) -> QuerySet[ItemEntrega]:
     """
-    QuerySet de ItemEntrega (com lote/benefício/assistido via atribuicao) com filtros:
-      - texto: nome do assistido
-      - intervalo de datas no lote
-      - benefício do lote
-      - status (todos/entregue/pendente)
+    Histórico de itens (ItemEntrega) com filtros:
+      - q: nome/cpf/telefone do assistido
+      - data_ini/data_fim: intervalo baseado em lote.data_entrega
+      - beneficio_id: lote.beneficio_id
+      - status: todos/entregue/pendente
     """
     status = _normalize_status(status)
 
     qs = (
         ItemEntrega.objects
-        .select_related("lote", "lote__beneficio", "atribuicao", "atribuicao__assistido")
+        .select_related(
+            "lote",
+            "lote__beneficio",
+            "atribuicao",
+            "atribuicao__assistido",
+        )
     )
 
     di = _parse_date(data_ini)
@@ -107,10 +160,10 @@ def historico_itens_por_assistido(
     if df:
         qs = qs.filter(lote__data_entrega__lte=df)
 
+    beneficio_id = (beneficio_id or "").strip()
     if beneficio_id:
         try:
-            bid = int(beneficio_id)
-            qs = qs.filter(lote__beneficio_id=bid)
+            qs = qs.filter(lote__beneficio_id=int(beneficio_id))
         except ValueError:
             pass
 
@@ -127,22 +180,5 @@ def historico_itens_por_assistido(
     elif status == "pendente":
         qs = qs.filter(entregue=False)
 
-    # ordena por data do lote desc, depois assistido
-    qs = qs.order_by("-lote__data_entrega", "atribuicao__assistido__nome", "-lote_id", "-id")
-    return qs
-
-
-def opcoes_beneficios():
-    """Benefícios ordenados para preencher <select> de filtro."""
-    return Beneficio.objects.order_by("nome", "id")
-
-def _normalize_status(status: str) -> str:
-    status = (status or "todos").strip().lower()
-    mapa = {
-        "todos": "todos",
-        "entregue": "entregue",
-        "entregues": "entregue",
-        "pendente": "pendente",
-        "pendentes": "pendente",
-    }
-    return mapa.get(status, "todos")
+    # ordem padrão (a view pode sobrescrever)
+    return qs.order_by("-lote__data_entrega", "atribuicao__assistido__nome", "-lote_id", "-id")
