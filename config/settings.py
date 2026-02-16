@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'apps.assistidos',
     'apps.beneficios',
     'apps.operacoes',
+    'apps.impressos',
 ]
 
 MIDDLEWARE = [

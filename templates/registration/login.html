@@ -1,11 +1,77 @@
-<h1>Login</h1>
+{% extends "operacoes/base.html" %}
+{% load static %}
 
-{% if form.errors %}
-  <p style="color:red;">Usuário ou senha inválidos.</p>
-{% endif %}
+{% block title %}Projeto Acolher | Entrar{% endblock %}
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Entrar</button>
-</form>
+{% block content %}
+<div class="container-fluid d-flex flex-column justify-content-center align-items-center"
+  style="flex-grow: 1;"> <!-- flex-grow: 1 para o conteúdo expandir e empurrar o footer para baixo -->
+  <div class="card shadow-lg p-4" style="max-width: 450px; width: 100%;">
+    <div class="card-body">
+      <div class="text-center mb-4">
+        <!-- LOGO REMOVIDA DAQUI, POIS O HEADER ESTARÁ VISÍVEL E JÁ CONTÉM A LOGO -->
+        <h4 class="card-title fw-bold">Entrar no Sistema</h4>
+        <p class="text-muted small">Sistema de Gestão de Assistidos</p>
+      </div>
+
+      {% if form.errors %}
+      <div class="alert alert-danger" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Seu usuário e/ou senha estão incorretos. Por favor, tente novamente.
+      </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3 d-flex align-items-baseline">  
+          <label for="{{ form.username.id_for_label }}" class="form-label me-2 mb-0"
+            style="min-width: 80px; text-align: right;">Usuário</label>
+          {{ form.username }}
+        </div>
+        <div class="mb-3 d-flex align-items-baseline">  
+          <label for="{{ form.password.id_for_label }}" class="form-label me-2 mb-0"
+            style="min-width: 80px; text-align: right;">Senha</label>
+          {{ form.password }}
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Acessar</button>
+      </form>
+
+      <div class="mt-4 text-center">
+        <a href="{% url 'password_reset' %}" class="text-muted small">Esqueceu sua senha?</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Estilos específicos para o formulário de login */
+  .card-body .form-control {
+    border-radius: .4rem;
+    padding: .75rem 1rem;
+    flex-grow: 1; /* Permite que o input preencha o espaço restante à direita do label */
+  }
+
+  .card-body .form-control:focus {
+    border-color: #0d6efd !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+  }
+
+  .card.shadow-lg {
+    border: none;
+    border-radius: 1rem;
+  }
+
+  /* Ajuste no body para que o flex-grow do container funcione e empurre o footer */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Remova o display: none da navbar para que ela seja exibida */
+  /* Caso exista um '.navbar { display: none; }' em outro lugar,
+     certifique-se de que esta regra não seja sobrescrita ou remova-a. */
+</style>
+{% endblock %}
