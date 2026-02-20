@@ -226,6 +226,14 @@
         .offcanvas .nav-link:last-child {
             border-bottom: 0;
         }
+
+        @media (max-width: 991.98px) {
+            .navbar-institucional .nav-link {
+                border: 0 !important;
+                padding: .4rem .25rem !important;
+                margin: 0 !important;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -271,18 +279,34 @@
     <!-- NAVBAR SUPERIOR -->
     <nav class="navbar navbar-expand-lg navbar-dark navbar-institucional">
         <div class="container-fluid">
+            <!-- MOBILE: navbar mínima (horizontal) -->
+            <div class="d-flex d-lg-none w-100 align-items-center justify-content-between">
 
-            <!-- Botão hambúrguer: SOMENTE no mobile -->
-            <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas"
-                data-bs-target="#offcanvasMain" aria-controls="offcanvasMain" aria-label="Abrir menu">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+                <a class="nav-link text-white px-2" href="{% url 'operacoes_home' %}">
+                    <i class="bi bi-house-door me-1"></i> Início
+                </a>
+
+                <div class="text-white-50 small d-flex align-items-center gap-2">
+                    <i class="bi bi-person-circle"></i>
+                    <span class="text-white">{{ user.username }}</span>
+                </div>
+
+                <form method="post" action="/accounts/logout/" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-light">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-sm-inline ms-1">Sair</span>
+                    </button>
+                </form>
+
+            </div>
+
 
             <!-- DESKTOP: menu normal (horizontal), só aparece em lg+ -->
             <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarMain">
 
                 <!-- Menus principais (desktop) -->
-              {% include "operacoes/_nav_items.html" %}
+                {% include "operacoes/_nav_items.html" %}
 
                 <!-- Usuário (desktop) -->
                 <ul class="navbar-nav ms-auto">
@@ -336,54 +360,7 @@
             </div>
 
             <!-- OFFCANVAS MOBILE: só aparece abaixo de lg -->
-            <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasMain"
-                aria-labelledby="offcanvasMainLabel">
-                <div class="offcanvas-header">
-                    <div>
-                        <div class="fw-semibold" id="offcanvasMainLabel">Projeto Acolher</div>
-                        <div class="small text-muted">Menu</div>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
-                </div>
 
-                <div class="offcanvas-body">
-                    {% include "operacoes/_nav_items_mobile.html" %}
-
-                    <hr>
-
-                    <!-- Usuário + Sair (mobile) -->
-                    {% if user.is_authenticated %}
-                    <div class="small text-muted mb-2">Usuário</div>
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="fw-semibold">{{ user.username }}</div>
-                        {% if user.is_superuser %}
-                        <span class="badge bg-danger">Admin</span>
-                        {% elif pode_deletar %}
-                        <span class="badge bg-success">Gestor</span>
-                        {% elif pode_editar %}
-                        <span class="badge bg-secondary">Operador</span>
-                        {% elif pode_ver %}
-                        <span class="badge bg-info text-dark">Consultor</span>
-                        {% endif %}
-                    </div>
-
-                    <div class="d-grid gap-2 mt-3">
-                        {% if user.is_superuser %}
-                        <a class="btn btn-outline-secondary" href="/admin/">
-                            <i class="bi bi-gear me-2"></i> Admin Django
-                        </a>
-                        {% endif %}
-
-                        <form method="post" action="/accounts/logout/">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger w-100">
-                                <i class="bi bi-box-arrow-right me-2"></i> Sair
-                            </button>
-                        </form>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
 
         </div>
     </nav>
