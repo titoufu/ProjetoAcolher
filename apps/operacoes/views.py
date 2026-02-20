@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
+from django.http import HttpResponseForbidden
 from django.shortcuts import render
+from .permissoes import pode_ver  # ajuste se estiver em outro lugar
 
 from apps.beneficios.models import LoteEntrega, Beneficio
 
@@ -53,3 +55,10 @@ def consulta_lotes_resumo(request):
         "campo_data": campo_data,
     }
     return render(request, "operacoes/consultas/lotes_resumo.html", contexto)
+
+
+@login_required
+def consultas_home(request):
+    if not pode_ver(request.user):
+        return HttpResponseForbidden("Sem permissão.")
+    return render(request, "operacoes/consultas_home.html")
