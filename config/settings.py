@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'apps.beneficios',
     'apps.operacoes',
     'apps.impressos',
+        # ferramentas
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
