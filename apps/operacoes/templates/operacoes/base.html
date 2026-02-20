@@ -210,6 +210,17 @@
         .offcanvas .dropdown-menu .dropdown-item {
             padding: .5rem .75rem;
         }
+
+        .offcanvas .nav-link {
+            border: 0 !important;
+            border-bottom: 1px solid rgba(0, 0, 0, .06);
+            padding: .6rem 0 !important;
+            margin: 0 !important;
+        }
+
+        .offcanvas .nav-link:last-child {
+            border-bottom: 0;
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -324,7 +335,7 @@
                 <div class="offcanvas-body">
                     <!-- Menus -->
                     <div class="mb-3">
-                        {% include "operacoes/_nav_items.html" with align_left=False extra_class="flex-column w-100" %}
+                        {% include "operacoes/_nav_items_mobile.html" %}
                     </div>
 
                     <hr>
