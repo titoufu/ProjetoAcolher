@@ -6,22 +6,10 @@
 <div class="container py-3">
 
   <div class="d-flex align-items-start justify-content-between gap-2 mb-3">
-    <div>
-      <h1 class="h4 mb-1">Consultas e Relatórios</h1>
-      <div class="text-muted small">Escolha uma consulta para abrir filtros e resultados.</div>
-    </div>
-
+  
     <a class="btn btn-outline-secondary btn-sm d-none d-sm-inline" href="{% url 'operacoes_home' %}">
       <i class="bi bi-arrow-left"></i> Voltar
     </a>
-  </div>
-
-  <div class="mb-3">
-    <div class="input-group">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input id="q-links" type="text" class="form-control"
-             placeholder="Buscar consulta... (ex.: saúde, lote, endereço)">
-    </div>
   </div>
 
   <div class="row g-3">
@@ -39,26 +27,22 @@
         <div class="card-body">
           <div class="d-grid gap-2">
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="identificação endereco endereço"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:identificacao_lista' %}">
               <i class="bi bi-person-vcard me-2"></i> Identificação e Endereço
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="situacao socioeconomica socioeconômica renda moradia"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:socioeconomico_lista' %}">
               <i class="bi bi-house-heart me-2"></i> Situação Socioeconômica
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="saude saúde condições remedio crônica"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:saude_lista' %}">
               <i class="bi bi-heart-pulse me-2"></i> Condições de Saúde
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="ficha inscrição impressão impressos"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'impressos:ficha_inscricao' %}">
               <i class="bi bi-printer me-2"></i> Ficha de Inscrição (impressão)
             </a>
@@ -81,14 +65,12 @@
         <div class="card-body">
           <div class="d-grid gap-2">
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="atribuicoes atribuições por assistido"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:atribuicoes_consulta' %}">
               <i class="bi bi-diagram-3 me-2"></i> Atribuições (por Assistido)
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="assistidos por beneficio benefício"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:beneficio_assistidos_consulta' %}">
               <i class="bi bi-people me-2"></i> Assistidos por Benefício
             </a>
@@ -111,32 +93,27 @@
         <div class="card-body">
           <div class="d-grid gap-2">
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="lotes entrega"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:entregas_lotes_lista' %}">
               <i class="bi bi-box-seam me-2"></i> Lotes de Entrega
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="resumo lote"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:consulta_lotes_resumo' %}">
               <i class="bi bi-bar-chart-line me-2"></i> Resumo por Lote
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="historico assistido histórico"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:entregas_assistido_historico' %}">
               <i class="bi bi-people me-2"></i> Histórico por Assistido
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="detalhe lote"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:entregas_lote_detalhe' %}">
               <i class="bi bi-eye me-2"></i> Detalhe de Lote
             </a>
 
-            <a class="btn btn-outline-primary btn-lg text-start consultas-link"
-               data-text="lista presenca presença chamada"
+            <a class="btn btn-outline-primary btn-lg text-start"
                href="{% url 'consultas:entregas_lote_chamada' %}">
               <i class="bi bi-card-checklist me-2"></i> Lista de Presença
             </a>
@@ -155,20 +132,4 @@
   </div>
 
 </div>
-
-<script>
-  (function() {
-    const input = document.getElementById("q-links");
-    if (!input) return;
-
-    const links = Array.from(document.querySelectorAll(".consultas-link"));
-    input.addEventListener("input", function() {
-      const q = (input.value || "").toLowerCase().trim();
-      links.forEach(a => {
-        const text = (a.getAttribute("data-text") || a.textContent || "").toLowerCase();
-        a.style.display = (!q || text.includes(q)) ? "" : "none";
-      });
-    });
-  })();
-</script>
 {% endblock %}

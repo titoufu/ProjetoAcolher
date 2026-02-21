@@ -58,7 +58,9 @@ def consulta_lotes_resumo(request):
 
 
 @login_required
+@login_required
 def consultas_home(request):
     if not pode_ver(request.user):
         return HttpResponseForbidden("Sem permissão.")
-    return render(request, "operacoes/consultas_home.html")
+    # ✅ caminho correto do template
+    return render(request, "operacoes/consultas/consultas_home.html")
