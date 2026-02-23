@@ -139,3 +139,6 @@ Este projeto usa **WhiteNoise**, então após alterações em static:
 
 - **Local no servidor:** `http://localhost:8080/`
 - **Rede local:** `http://IP_DO_SERVIDOR:8080/` (ex.: `http://192.168.0.30:8080/`)
+r: http://localhost:8080/
+
+Rede local: http://IP_DO_SERVIDOR:8080/ (ex.: http://192.168.0.30:8080/)
